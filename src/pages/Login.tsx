@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AuthenticationService, type TokenResponse } from '@/generated-api'
+import axios from 'axios'
 
 
 export default function Login() {
@@ -22,8 +23,12 @@ export default function Login() {
       })
       localStorage.setItem('token', res.access_token)
       nav('/parent')
-    } catch (err: any) {
-      setError(err?.response?.data?.detail || 'Login failed')
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.detail || 'Login failed')
+      } else {
+        setError('Login failed')
+      }
     } finally {
       setLoading(false)
     }

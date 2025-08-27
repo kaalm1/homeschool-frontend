@@ -1,30 +1,37 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import axios from 'axios'
-
-type Activity = { id: number; title: string; subject: string; kid_id: number; done: boolean }
+import { KidsService, ActivitiesService, type KidResponse, type ActivityResponse } from '@/generated-api'
 
 export default function KidDashboard() {
   const { kidId } = useParams()
-  const token = localStorage.getItem('token')
-  const api = axios.create({ baseURL: import.meta.env.VITE_API_URL, headers: { Authorization: `Bearer ${token}` } })
-  const [items, setItems] = useState<Activity[]>([])
+  const [items, setItems] = useState<ActivityResponse[]>([])
   const [kidName, setKidName] = useState<string>('')
 
   useEffect(() => {
     (async () => {
-      const k = await api.get('/kids')
-      const kid = k.data.find((x: any) => String(x.id) === String(kidId))
-      setKidName(kid?.name || 'Kid')
-      const a = await api.get('/schedule/today')
-      setItems(a.data.filter((x: any) => String(x.kid_id) === String(kidId)))
+      try {
+        // Get all kids
+        const kids: KidResponse[] = await KidsService.getKidsApiV1KidsGet()
+        const kid = kids.find(k => String(k.id) === String(kidId))
+        setKidName(kid?.name || 'Kid')
+
+        // Get activities for this kid
+        const activities: ActivityResponse[] = await ActivitiesService.getActivitiesApiV1ActivitiesGet({ kidId: kid ? kid.id : undefined })
+        setItems(activities)
+      } catch (err) {
+        console.error('Error fetching kid or activities', err)
+      }
     })()
   }, [kidId])
 
   async function toggleDone(id: number) {
-    const res = await api.post('/schedule/toggle', { id })
-    setItems(prev => prev.map(i => i.id === id ? res.data : i))
+    try {
+      const updated: ActivityResponse = await ActivitiesService.toggleActivityApiV1ActivitiesActivityIdTogglePost({ activityId: id })
+      setItems(prev => prev.map(i => i.id === id ? updated : i))
+    } catch (err) {
+      console.error('Error toggling activity', err)
+    }
   }
 
   return (

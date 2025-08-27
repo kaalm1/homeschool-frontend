@@ -9,7 +9,7 @@ type LoginResponse = {
 }
 
 export default function Login() {
-  const [email, setEmail] = useState('demo@home.school')
+  const [email, setEmail] = useState('demo@homeschool.app')
   const [password, setPassword] = useState('demo123')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

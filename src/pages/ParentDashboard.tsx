@@ -2,27 +2,33 @@
 import { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
+import { KidsService, ActivitiesService, type KidResponse, type ActivityResponse } from '@/generated-api'
 
-type Kid = { id: number; name: string; color: string }
-type Activity = { id: number; title: string; subject: string; kid_id: number; done: boolean }
+// type Kid = { id: number; name: string; color: string }
+// type Activity = { id: number; title: string; subject: string; kid_id: number; done: boolean }
 
 export default function ParentDashboard() {
-  const [kids, setKids] = useState<Kid[]>([])
-  const [activities, setActivities] = useState<Activity[]>([])
+  const [kids, setKids] = useState<KidResponse[]>([])
+  const [activities, setActivities] = useState<ActivityResponse[]>([])
   const token = localStorage.getItem('token')
   const api = axios.create({ baseURL: import.meta.env.VITE_API_URL, headers: { Authorization: `Bearer ${token}` } })
 
   useEffect(() => {
-    (async () => {
-      const k = await api.get('/kids')
-      setKids(k.data)
-      const a = await api.get('/schedule/today')
-      setActivities(a.data)
+    ;(async () => {
+      try {
+        const k = await KidsService.getKidsApiV1KidsGet()
+        setKids(k)
+
+        const a = await ActivitiesService.getActivitiesApiV1ActivitiesGet({})
+        setActivities(a)
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err)
+      }
     })()
   }, [])
 
   const byKid = useMemo(() => {
-    const map: Record<number, Activity[]> = {}
+    const map: Record<number, ActivityResponse[]> = {}
     for (const a of activities) {
       map[a.kid_id] = map[a.kid_id] || []
       map[a.kid_id].push(a)
@@ -33,8 +39,19 @@ export default function ParentDashboard() {
   async function addQuickActivity(kid_id: number) {
     const title = prompt('Quick activity title (e.g., Read 10 minutes)')
     if (!title) return
-    const res = await api.post('/schedule/add', { title, subject: 'General', kid_id })
-    setActivities(prev => [...prev, res.data])
+
+    try {
+      const newActivity = await ActivitiesService.createActivityApiV1ActivitiesPost({
+        requestBody: {
+          title,
+          subject: 'General',
+          kid_id,
+        },
+      })
+      setActivities(prev => [...prev, newActivity])
+    } catch (err) {
+      console.error('Error adding activity:', err)
+    }
   }
 
   return (

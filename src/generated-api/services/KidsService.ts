@@ -1,7 +1,7 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
-/* eslint-disable */
+ 
 import type { KidCreate } from '../models/KidCreate';
 import type { KidResponse } from '../models/KidResponse';
 import type { KidUpdate } from '../models/KidUpdate';

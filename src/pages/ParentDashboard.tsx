@@ -1,6 +1,5 @@
 
 import { useEffect, useMemo, useState } from 'react'
-import axios from 'axios'
 import { Link } from 'react-router-dom'
 import { KidsService, ActivitiesService, type KidResponse, type ActivityResponse } from '@/generated-api'
 
@@ -10,8 +9,6 @@ import { KidsService, ActivitiesService, type KidResponse, type ActivityResponse
 export default function ParentDashboard() {
   const [kids, setKids] = useState<KidResponse[]>([])
   const [activities, setActivities] = useState<ActivityResponse[]>([])
-  const token = localStorage.getItem('token')
-  const api = axios.create({ baseURL: import.meta.env.VITE_API_URL, headers: { Authorization: `Bearer ${token}` } })
 
   useEffect(() => {
     ;(async () => {

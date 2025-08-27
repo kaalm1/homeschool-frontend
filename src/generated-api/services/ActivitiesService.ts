@@ -1,7 +1,7 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
-/* eslint-disable */
+ 
 import type { ActivityCreate } from '../models/ActivityCreate';
 import type { ActivityResponse } from '../models/ActivityResponse';
 import type { ActivityUpdate } from '../models/ActivityUpdate';

@@ -1,12 +1,8 @@
 
 import { useState } from 'react'
-import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { AuthenticationService, type TokenResponse } from '@/generated-api'
 
-type LoginResponse = {
-  access_token: string
-}
 
 export default function Login() {
   const [email, setEmail] = useState('demo@homeschool.app')

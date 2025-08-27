@@ -1,8 +1,7 @@
-
-import { Routes, Route, Navigate } from 'react-router-dom'
-import Login from './pages/Login'
-import ParentDashboard from './pages/ParentDashboard'
-import KidDashboard from './pages/KidDashboard'
+import { Routes, Route, Navigate } from 'react-router-dom';
+import Login from './pages/Login';
+import ParentDashboard from './pages/ParentDashboard';
+import KidDashboard from './pages/KidDashboard';
 
 export default function App() {
   return (
@@ -12,5 +11,5 @@ export default function App() {
       <Route path="/parent" element={<ParentDashboard />} />
       <Route path="/kid/:kidId" element={<KidDashboard />} />
     </Routes>
-  )
+  );
 }

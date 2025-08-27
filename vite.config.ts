@@ -1,11 +1,13 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import tailwindcss from '@tailwindcss/vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
@@ -30,14 +32,19 @@ export default defineConfig({
             src: 'pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
-          }
+            purpose: 'any maskable',
+          },
         ],
       },
     }),
   ],
   server: {
-    port: 5173, // default vite port
-    open: true, // auto open in browser
+    port: 5173,
+    open: true,
+  },
+  resolve: {
+    alias: {
+      '@': '/src', // <-- Vite alias for src folder
+    },
   },
 })

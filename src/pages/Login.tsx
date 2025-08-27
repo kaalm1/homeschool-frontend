@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { AuthenticationService, type TokenResponse } from '@/generated-api'
 
 type LoginResponse = {
   access_token: string
@@ -20,11 +21,10 @@ export default function Login() {
     setError(null)
   
     try {
-      const res = await axios.post<LoginResponse>(
-        import.meta.env.VITE_API_URL + '/auth/login',
-        { email, password }
-      )
-      localStorage.setItem('token', res.data.access_token)
+      const res: TokenResponse = await AuthenticationService.loginApiV1AuthLoginPost({
+        requestBody: { email, password },
+      })
+      localStorage.setItem('token', res.access_token)
       nav('/parent')
     } catch (err: any) {
       setError(err?.response?.data?.detail || 'Login failed')

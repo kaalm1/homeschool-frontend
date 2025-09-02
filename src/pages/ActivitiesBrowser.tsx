@@ -858,6 +858,11 @@ export default function ActivitiesBrowser() {
                         {formatAgeGroups(activity.age_groups)}
                       </span>
                     )}
+                    {activity.seasons?.length && (
+                      <div className="rounded bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800">
+                        <span>{formatSeasons(activity.seasons)}</span>
+                      </div>
+                    )}
                   </div>
                   {/* <button className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline">
                     View Details

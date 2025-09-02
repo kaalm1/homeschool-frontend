@@ -6,12 +6,13 @@
  * Login request model.
  */
 export type LoginRequest = {
-  /**
-   * User email address
-   */
-  email: string;
-  /**
-   * User password
-   */
-  password: string;
+    /**
+     * User email address
+     */
+    email: string;
+    /**
+     * User password
+     */
+    password: string;
 };
+

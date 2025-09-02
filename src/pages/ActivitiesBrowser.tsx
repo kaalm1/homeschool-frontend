@@ -712,6 +712,16 @@ export default function ActivitiesBrowser() {
                                 onChange={handleTagChange}
                               />
                             )}
+
+                            {/* Frequency */}
+                            {filters.frequency && (
+                              <TagCheckboxGroup
+                                tagCategory="frequency"
+                                options={filters.frequency}
+                                selectedValues={editForm.frequency}
+                                onChange={handleTagChange}
+                              />
+                            )}
                           </div>
                         </div>
 

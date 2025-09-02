@@ -12,62 +12,63 @@ import type { Participants } from './Participants';
 import type { Season } from './Season';
 import type { Theme } from './Theme';
 export type ActivityResponse = {
-  created_at: string;
-  updated_at: string;
-  /**
-   * Activity title
-   */
-  title: string;
-  /**
-   * Activity description
-   */
-  description?: string | null;
-  /**
-   * Activity costs
-   */
-  costs?: Array<Cost> | null;
-  /**
-   * Activity durations
-   */
-  durations?: Array<Duration> | null;
-  /**
-   * Activity participants
-   */
-  participants?: Array<Participants> | null;
-  /**
-   * Activity locations
-   */
-  locations?: Array<Location> | null;
-  /**
-   * Activity seasons
-   */
-  seasons?: Array<Season> | null;
-  /**
-   * Activity age groups
-   */
-  age_groups?: Array<AgeGroup> | null;
-  /**
-   * Activity frequency
-   */
-  frequency?: Array<Frequency> | null;
-  /**
-   * Activity theme
-   */
-  themes?: Array<Theme> | null;
-  /**
-   * Activity type
-   */
-  types?: Array<ActivityType> | null;
-  /**
-   * Activity ID
-   */
-  id: number;
-  /**
-   * Activity completion status
-   */
-  done: boolean;
-  /**
-   * Kid ID
-   */
-  kid_id?: number | null;
+    created_at: string;
+    updated_at: string;
+    /**
+     * Activity title
+     */
+    title: string;
+    /**
+     * Activity description
+     */
+    description?: (string | null);
+    /**
+     * Activity costs
+     */
+    costs?: (Array<Cost> | null);
+    /**
+     * Activity durations
+     */
+    durations?: (Array<Duration> | null);
+    /**
+     * Activity participants
+     */
+    participants?: (Array<Participants> | null);
+    /**
+     * Activity locations
+     */
+    locations?: (Array<Location> | null);
+    /**
+     * Activity seasons
+     */
+    seasons?: (Array<Season> | null);
+    /**
+     * Activity age groups
+     */
+    age_groups?: (Array<AgeGroup> | null);
+    /**
+     * Activity frequency
+     */
+    frequency?: (Array<Frequency> | null);
+    /**
+     * Activity theme
+     */
+    themes?: (Array<Theme> | null);
+    /**
+     * Activity type
+     */
+    activity_types?: (Array<ActivityType> | null);
+    /**
+     * Activity ID
+     */
+    id: number;
+    /**
+     * Activity completion status
+     */
+    done: boolean;
+    /**
+     * Kid ID
+     */
+    kid_id?: (number | null);
 };
+

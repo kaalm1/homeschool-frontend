@@ -17,7 +17,7 @@ import {
 
 type TagCategory =
   | 'themes'
-  | 'types'
+  | 'activity_types'
   | 'locations'
   | 'costs'
   | 'durations'
@@ -40,7 +40,7 @@ const DEFAULT_EDIT_FORM = {
   title: '',
   description: '',
   themes: [] as Theme[],
-  types: [] as ActivityType[],
+  activity_types: [] as ActivityType[],
   locations: [] as Location[],
   costs: [] as Cost[],
   durations: [] as Duration[],
@@ -164,7 +164,7 @@ export default function ActivitiesBrowser() {
       title: activity.title ?? '',
       description: activity.description ?? '',
       themes: activity.themes ?? [],
-      types: activity.types ?? [],
+      activity_types: activity.activity_types ?? [],
       locations: activity.locations ?? [],
       costs: activity.costs ?? [],
       durations: activity.durations ?? [],
@@ -181,7 +181,7 @@ export default function ActivitiesBrowser() {
       title: '',
       description: '',
       themes: [],
-      types: [],
+      activity_types: [],
       locations: [],
       costs: [],
       durations: [],
@@ -271,7 +271,7 @@ export default function ActivitiesBrowser() {
   const getTagColor = (type: TagCategory) => {
     const colorMap: Record<TagCategory, string> = {
       themes: 'bg-purple-100 text-purple-800',
-      types: 'bg-blue-100 text-blue-800',
+      activity_types: 'bg-blue-100 text-blue-800',
       locations: 'bg-green-100 text-green-800',
       costs: 'bg-yellow-100 text-yellow-800',
       durations: 'bg-indigo-100 text-indigo-800',
@@ -512,7 +512,7 @@ export default function ActivitiesBrowser() {
                               <TagCheckboxGroup
                                 tagCategory="types"
                                 options={filters.types}
-                                selectedValues={editForm.types}
+                                selectedValues={editForm.activity_types}
                                 onChange={handleTagChange}
                               />
                             )}
@@ -680,19 +680,19 @@ export default function ActivitiesBrowser() {
                       ) : null}
 
                       {/* Activity Types */}
-                      {activity.types?.length ? (
+                      {activity.activity_types?.length ? (
                         <div className="flex flex-wrap gap-1">
-                          {activity.types.slice(0, 2).map((type) => (
+                          {activity.activity_types.slice(0, 2).map((type) => (
                             <span
                               key={type}
-                              className={`rounded-full px-2 py-1 text-xs font-medium ${getTagColor('types')}`}
+                              className={`rounded-full px-2 py-1 text-xs font-medium ${getTagColor('activity_types')}`}
                             >
                               {getFilterLabel('activity_types', type)}
                             </span>
                           ))}
-                          {activity.types.length > 2 && (
+                          {activity.activity_types.length > 2 && (
                             <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
-                              +{activity.types.length - 2} more
+                              +{activity.activity_types.length - 2} more
                             </span>
                           )}
                         </div>

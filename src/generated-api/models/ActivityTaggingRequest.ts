@@ -3,8 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 export type ActivityTaggingRequest = {
-  /**
-   * Raw activities text to be tagged
-   */
-  activities: string;
+    /**
+     * Raw activities text to be tagged
+     */
+    activities: string;
 };
+

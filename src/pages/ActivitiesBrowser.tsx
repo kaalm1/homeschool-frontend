@@ -11,6 +11,8 @@ import {
   type Season,
   type AgeGroup,
   type Location,
+  type Theme,
+  type ActivityType,
 } from '@/generated-api';
 
 type TagCategory =
@@ -34,6 +36,20 @@ type FilterValue =
   | AgeGroup
   | Frequency;
 
+const DEFAULT_EDIT_FORM = {
+  title: '',
+  description: '',
+  themes: [] as Theme[],
+  types: [] as ActivityType[],
+  locations: [] as Location[],
+  costs: [] as Cost[],
+  durations: [] as Duration[],
+  participants: [] as Participants[],
+  seasons: [] as Season[],
+  age_groups: [] as AgeGroup[],
+  frequency: [] as Frequency[],
+};
+
 function hasFilterMatch(
   activity: ActivityResponse,
   filterType: TagCategory,
@@ -54,7 +70,7 @@ export default function ActivitiesBrowser() {
   const [newActivityText, setNewActivityText] = useState('');
   const [addingActivity, setAddingActivity] = useState(false);
   const [editingActivity, setEditingActivity] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState({ title: '', description: '' });
+  const [editForm, setEditForm] = useState(DEFAULT_EDIT_FORM);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -147,12 +163,51 @@ export default function ActivitiesBrowser() {
     setEditForm({
       title: activity.title ?? '',
       description: activity.description ?? '',
+      themes: activity.themes ?? [],
+      types: activity.types ?? [],
+      locations: activity.locations ?? [],
+      costs: activity.costs ?? [],
+      durations: activity.durations ?? [],
+      participants: activity.participants ?? [],
+      seasons: activity.seasons ?? [],
+      age_groups: activity.age_groups ?? [],
+      frequency: activity.frequency ?? [],
     });
   };
 
   const cancelEdit = () => {
     setEditingActivity(null);
-    setEditForm({ title: '', description: '' });
+    setEditForm({
+      title: '',
+      description: '',
+      themes: [],
+      types: [],
+      locations: [],
+      costs: [],
+      durations: [],
+      participants: [],
+      seasons: [],
+      age_groups: [],
+      frequency: [],
+    });
+  };
+
+  const handleTagChange = (tagCategory: string, value: string, checked: boolean) => {
+    setEditForm((prev) => {
+      const currentValues = (prev[tagCategory as keyof typeof prev] as string[]) || [];
+      let newValues: string[];
+
+      if (checked) {
+        newValues = [...currentValues, value];
+      } else {
+        newValues = currentValues.filter((v) => v !== value);
+      }
+
+      return {
+        ...prev,
+        [tagCategory]: newValues,
+      };
+    });
   };
 
   const saveEdit = async () => {
@@ -171,7 +226,7 @@ export default function ActivitiesBrowser() {
         )
       );
       setEditingActivity(null);
-      setEditForm({ title: '', description: '' });
+      setEditForm(DEFAULT_EDIT_FORM);
     } catch (err) {
       console.error('Failed to update activity:', err);
     }
@@ -233,6 +288,37 @@ export default function ActivitiesBrowser() {
     if (!value) return '';
     return filters[type]?.find((f) => f.value === String(value))?.label ?? String(value);
   };
+
+  const TagCheckboxGroup = ({
+    tagCategory,
+    options,
+    selectedValues,
+    onChange,
+  }: {
+    tagCategory: string;
+    options: { value: string; label: string }[];
+    selectedValues: string[];
+    onChange: (category: string, value: string, checked: boolean) => void;
+  }) => (
+    <div className="space-y-2">
+      <label className="text-sm font-medium text-gray-700 capitalize">
+        {tagCategory.replace('_', ' ')}
+      </label>
+      <div className="max-h-32 space-y-1 overflow-y-auto rounded-md border bg-gray-50 p-2">
+        {options.map((option) => (
+          <label key={option.value} className="flex items-center space-x-2 text-sm">
+            <input
+              type="checkbox"
+              checked={selectedValues.includes(option.value)}
+              onChange={(e) => onChange(tagCategory, option.value, e.target.checked)}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-gray-700">{option.label}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -386,24 +472,115 @@ export default function ActivitiesBrowser() {
                 <div className="mb-3 flex items-start justify-between">
                   <div className="flex-1">
                     {editingActivity === activity.id ? (
-                      <div className="space-y-3">
-                        <input
-                          type="text"
-                          value={editForm.title}
-                          onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
-                          placeholder="Activity title"
-                        />
-                        <textarea
-                          value={editForm.description}
-                          onChange={(e) =>
-                            setEditForm({ ...editForm, description: e.target.value })
-                          }
-                          className="w-full resize-none rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
-                          rows={3}
-                          placeholder="Activity description"
-                        />
-                        <div className="flex space-x-2">
+                      <div className="space-y-4">
+                        {/* Title and Description */}
+                        <div className="space-y-3">
+                          <input
+                            type="text"
+                            value={editForm.title}
+                            onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+                            placeholder="Activity title"
+                          />
+                          <textarea
+                            value={editForm.description}
+                            onChange={(e) =>
+                              setEditForm({ ...editForm, description: e.target.value })
+                            }
+                            className="w-full resize-none rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+                            rows={3}
+                            placeholder="Activity description"
+                          />
+                        </div>
+
+                        {/* Tags Section */}
+                        <div className="border-t pt-4">
+                          <h4 className="mb-3 text-sm font-medium text-gray-900">Tags</h4>
+                          <div className="grid max-h-64 grid-cols-2 gap-4 overflow-y-auto">
+                            {/* Themes */}
+                            {filters.themes && (
+                              <TagCheckboxGroup
+                                tagCategory="themes"
+                                options={filters.themes}
+                                selectedValues={editForm.themes}
+                                onChange={handleTagChange}
+                              />
+                            )}
+
+                            {/* Types */}
+                            {filters.types && (
+                              <TagCheckboxGroup
+                                tagCategory="types"
+                                options={filters.types}
+                                selectedValues={editForm.types}
+                                onChange={handleTagChange}
+                              />
+                            )}
+
+                            {/* Locations */}
+                            {filters.locations && (
+                              <TagCheckboxGroup
+                                tagCategory="locations"
+                                options={filters.locations}
+                                selectedValues={editForm.locations}
+                                onChange={handleTagChange}
+                              />
+                            )}
+
+                            {/* Costs */}
+                            {filters.costs && (
+                              <TagCheckboxGroup
+                                tagCategory="costs"
+                                options={filters.costs}
+                                selectedValues={editForm.costs}
+                                onChange={handleTagChange}
+                              />
+                            )}
+
+                            {/* Durations */}
+                            {filters.durations && (
+                              <TagCheckboxGroup
+                                tagCategory="durations"
+                                options={filters.durations}
+                                selectedValues={editForm.durations}
+                                onChange={handleTagChange}
+                              />
+                            )}
+
+                            {/* Participants */}
+                            {filters.participants && (
+                              <TagCheckboxGroup
+                                tagCategory="participants"
+                                options={filters.participants}
+                                selectedValues={editForm.participants}
+                                onChange={handleTagChange}
+                              />
+                            )}
+
+                            {/* Seasons */}
+                            {filters.seasons && (
+                              <TagCheckboxGroup
+                                tagCategory="seasons"
+                                options={filters.seasons}
+                                selectedValues={editForm.seasons}
+                                onChange={handleTagChange}
+                              />
+                            )}
+
+                            {/* Age Groups */}
+                            {filters.age_groups && (
+                              <TagCheckboxGroup
+                                tagCategory="age_groups"
+                                options={filters.age_groups}
+                                selectedValues={editForm.age_groups}
+                                onChange={handleTagChange}
+                              />
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex space-x-2 border-t pt-3">
                           <button
                             onClick={saveEdit}
                             className="flex items-center space-x-1 rounded-md bg-green-600 px-3 py-1 text-sm text-white transition-colors hover:bg-green-700"

@@ -2,4 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Participants = any[];
+export enum Participants {
+  SOLO = 'solo',
+  TWO_PLAYER = 'two_player',
+  SMALL_GROUP = 'small_group',
+  MEDIUM_GROUP = 'medium_group',
+  LARGE_GROUP = 'large_group',
+  FAMILY = 'family',
+}

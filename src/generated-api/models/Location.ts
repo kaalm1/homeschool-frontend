@@ -2,4 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Location = any[];
+export enum Location {
+  HOME_INDOOR = 'home_indoor',
+  HOME_OUTDOOR = 'home_outdoor',
+  LOCAL = 'local',
+  REGIONAL = 'regional',
+  TRAVEL = 'travel',
+}

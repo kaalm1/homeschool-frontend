@@ -2,4 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Duration = any[];
+export enum Duration {
+  SHORT = 'short',
+  MEDIUM = 'medium',
+  LONG = 'long',
+  FULL_DAY = 'full_day',
+  MULTI_DAY = 'multi_day',
+}

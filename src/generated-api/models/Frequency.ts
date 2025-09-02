@@ -2,4 +2,10 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Frequency = any[];
+export enum Frequency {
+  DAILY = 'daily',
+  WEEKLY = 'weekly',
+  MONTHLY = 'monthly',
+  ANNUALLY = 'annually',
+  SEASONAL = 'seasonal',
+}

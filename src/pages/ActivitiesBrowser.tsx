@@ -34,6 +34,15 @@ type FilterValue =
   | AgeGroup
   | Frequency;
 
+function hasFilterMatch(
+  activity: ActivityResponse,
+  filterType: TagCategory,
+  values: string[]
+): boolean {
+  const activityValues = (activity[filterType] as string[] | undefined) ?? [];
+  return values.some((v) => activityValues.includes(v));
+}
+
 export default function ActivitiesBrowser() {
   const [activities, setActivities] = useState<ActivityResponse[]>([]);
   const [filters, setFilters] = useState<Record<string, { value: string; label: string }[]>>({});
@@ -82,10 +91,8 @@ export default function ActivitiesBrowser() {
         TagCategory,
         string[],
       ][]) {
-        if (selectedValues.length > 0) {
-          const activityValues = activity[filterType] || [];
-          const hasMatch = selectedValues.some((value) => activityValues.includes(value));
-          if (!hasMatch) return false;
+        if (selectedValues.length > 0 && !hasFilterMatch(activity, filterType, selectedValues)) {
+          return false;
         }
       }
 

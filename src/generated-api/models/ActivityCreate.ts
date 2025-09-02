@@ -1,7 +1,7 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
-
+/* eslint-disable */
 import type { ActivityType } from './ActivityType';
 import type { AgeGroup } from './AgeGroup';
 import type { Cost } from './Cost';
@@ -47,15 +47,15 @@ export type ActivityCreate = {
   /**
    * Activity frequency
    */
-  frequency?: Frequency | null;
+  frequency?: Array<Frequency> | null;
   /**
    * Activity theme
    */
-  themes?: Theme | null;
+  themes?: Array<Theme> | null;
   /**
    * Activity type
    */
-  types?: ActivityType | null;
+  types?: Array<ActivityType> | null;
   /**
    * Kid ID
    */

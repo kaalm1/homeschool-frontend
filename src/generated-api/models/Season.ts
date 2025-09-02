@@ -2,4 +2,12 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Season = any[];
+export enum Season {
+  ALL = 'all',
+  SPRING = 'spring',
+  SUMMER = 'summer',
+  FALL = 'fall',
+  WINTER = 'winter',
+  RAINY_DAY = 'rainy_day',
+  SNOWY_DAY = 'snowy_day',
+}

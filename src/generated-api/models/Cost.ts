@@ -2,4 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type Cost = any[];
+export enum Cost {
+  FREE = 'free',
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+}

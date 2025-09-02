@@ -1,7 +1,7 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
-
+/* eslint-disable */
 import type { ActivityType } from './ActivityType';
 import type { AgeGroup } from './AgeGroup';
 import type { Cost } from './Cost';

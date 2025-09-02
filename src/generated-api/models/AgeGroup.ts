@@ -2,4 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type AgeGroup = any[];
+export enum AgeGroup {
+  TODDLER = 'toddler',
+  CHILD = 'child',
+  TWEEN = 'tween',
+  TEEN = 'teen',
+  ADULT = 'adult',
+  FAMILY = 'family',
+}

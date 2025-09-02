@@ -1,7 +1,7 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
- 
+
 export { ApiError } from './core/ApiError';
 export { CancelablePromise, CancelError } from './core/CancelablePromise';
 export { OpenAPI } from './core/OpenAPI';
@@ -9,6 +9,8 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { ActivityCreate } from './models/ActivityCreate';
 export type { ActivityResponse } from './models/ActivityResponse';
+export type { ActivityTaggingRequest } from './models/ActivityTaggingRequest';
+export type { ActivityTaggingResponse } from './models/ActivityTaggingResponse';
 export type { ActivityType } from './models/ActivityType';
 export type { ActivityUpdate } from './models/ActivityUpdate';
 export type { AgeGroup } from './models/AgeGroup';
@@ -34,4 +36,5 @@ export { ActivitiesService } from './services/ActivitiesService';
 export { AuthenticationService } from './services/AuthenticationService';
 export { DefaultService } from './services/DefaultService';
 export { KidsService } from './services/KidsService';
+export { LlmService } from './services/LlmService';
 export { RewardsService } from './services/RewardsService';

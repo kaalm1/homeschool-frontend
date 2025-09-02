@@ -2,8 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 
-export type ValidationError = {
-  loc: Array<string | number>;
-  msg: string;
-  type: string;
+export type ActivityTaggingRequest = {
+  /**
+   * Raw activities text to be tagged
+   */
+  activities: string;
 };

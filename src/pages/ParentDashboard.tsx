@@ -19,7 +19,7 @@ export default function ParentDashboard() {
         setKids(k);
 
         // Updated to match your API - no query params needed to get all activities
-        const a = await ActivitiesService.getActivitiesApiV1ActivitiesGet({kidId: undefined});
+        const a = await ActivitiesService.getActivitiesApiV1ActivitiesGet({ kidId: undefined });
         setActivities(a);
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
@@ -69,13 +69,12 @@ export default function ParentDashboard() {
   async function toggleActivity(activityId: number) {
     try {
       // Use the toggle endpoint from your API
-      const updatedActivity = await ActivitiesService.toggleActivityApiV1ActivitiesActivityIdTogglePost({
-        activityId,
-      });
-      
-      setActivities((prev) =>
-        prev.map((a) => (a.id === activityId ? updatedActivity : a))
-      );
+      const updatedActivity =
+        await ActivitiesService.toggleActivityApiV1ActivitiesActivityIdTogglePost({
+          activityId,
+        });
+
+      setActivities((prev) => prev.map((a) => (a.id === activityId ? updatedActivity : a)));
     } catch (err) {
       console.error('Error toggling activity:', err);
     }
@@ -124,12 +123,12 @@ export default function ParentDashboard() {
                     {a.title}
                     {/* Show description if available */}
                     {a.description && (
-                      <div className="text-xs text-slate-500 mt-1">{a.description}</div>
+                      <div className="mt-1 text-xs text-slate-500">{a.description}</div>
                     )}
                   </span>
                   <button
                     onClick={() => toggleActivity(a.id)}
-                    className="ml-2 text-lg hover:scale-110 transition-transform"
+                    className="ml-2 text-lg transition-transform hover:scale-110"
                     title={a.done ? 'Mark as incomplete' : 'Mark as complete'}
                   >
                     {a.done ? '✅' : '⬜️'}
@@ -149,11 +148,11 @@ export default function ParentDashboard() {
       </div>
 
       {kids.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">No kids found. Add a kid to get started!</p>
+        <div className="py-12 text-center">
+          <p className="text-lg text-gray-500">No kids found. Add a kid to get started!</p>
           <Link
             to="/add-kid"
-            className="inline-block mt-4 px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+            className="mt-4 inline-block rounded-md bg-blue-500 px-6 py-2 text-white transition hover:bg-blue-600"
           >
             Add First Kid
           </Link>

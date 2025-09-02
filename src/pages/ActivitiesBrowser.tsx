@@ -1,185 +1,18 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Search, Filter, Plus, Clock, Users, MapPin } from 'lucide-react';
-import { ActivitiesService, type ActivityResponse, type Duration, type Participants, type Cost, type Frequency, type Season, type AgeGroup } from '@/generated-api';
+import { Search, Filter, Plus, Clock, Users, MapPin, Check, X, Edit3, Trash2 } from 'lucide-react';
+import {
+  ActivitiesService,
+  LlmService,
+  type ActivityResponse,
+  type Duration,
+  type Participants,
+  type Cost,
+  type Frequency,
+  type Season,
+  type AgeGroup,
+  type Location,
+} from '@/generated-api';
 
-
-// // Mock data for demonstration - in real app, this would come from your API
-// const mockFilters = {
-//   costs: [
-//     { value: 'free', label: 'Free' },
-//     { value: 'low', label: '$' },
-//     { value: 'medium', label: '$$' },
-//     { value: 'high', label: '$$$' }
-//   ],
-//   durations: [
-//     { value: 'short', label: 'Short' },
-//     { value: 'medium', label: 'Medium' },
-//     { value: 'long', label: 'Long' },
-//     { value: 'full_day', label: 'Full Day' },
-//     { value: 'multi_day', label: 'Multi-Day' }
-//   ],
-//   participants: [
-//     { value: 'solo', label: 'Solo' },
-//     { value: 'two_player', label: '2 Players' },
-//     { value: 'small_group', label: '3–5' },
-//     { value: 'medium_group', label: '6–10' },
-//     { value: 'large_group', label: '10+' },
-//     { value: 'family', label: 'Family' }
-//   ],
-//   locations: [
-//     { value: 'home_indoor', label: 'Home Indoor' },
-//     { value: 'home_outdoor', label: 'Home Outdoor' },
-//     { value: 'local', label: 'Local' },
-//     { value: 'regional', label: 'Regional' },
-//     { value: 'travel', label: 'Travel' }
-//   ],
-//   seasons: [
-//     { value: 'all', label: 'All Seasons' },
-//     { value: 'spring', label: 'Spring' },
-//     { value: 'summer', label: 'Summer' },
-//     { value: 'fall', label: 'Fall' },
-//     { value: 'winter', label: 'Winter' },
-//     { value: 'rainy_day', label: 'Rainy Day' },
-//     { value: 'snowy_day', label: 'Snowy Day' }
-//   ],
-//   age_groups: [
-//     { value: 'toddler', label: 'Toddler' },
-//     { value: 'child', label: 'Child' },
-//     { value: 'tween', label: 'Tween' },
-//     { value: 'teen', label: 'Teen' },
-//     { value: 'adult', label: 'Adult' },
-//     { value: 'family', label: 'Family' }
-//   ],
-//   themes: [
-//     { value: 'adventure', label: '🌋 Adventure' },
-//     { value: 'creative', label: '🎨 Creative / Arts' },
-//     { value: 'educational', label: '📚 Educational' },
-//     { value: 'fitness', label: '💪 Fitness & Sports' },
-//     { value: 'food_drink', label: '🍴 Food & Drink' },
-//     { value: 'festive', label: '🎉 Festive / Celebration' },
-//     { value: 'mindfulness', label: '🧘 Mindfulness' },
-//     { value: 'nature', label: '🌿 Nature' },
-//     { value: 'relaxation', label: '🛋️ Relaxation' },
-//     { value: 'social', label: '🤝 Social' }
-//   ],
-//   activity_types: [
-//     { value: 'amusement_park', label: '🎢 Amusement Park' },
-//     { value: 'arts_crafts', label: '🎨 Creative / Arts' },
-//     { value: 'board_games', label: '🎲 Board Games' },
-//     { value: 'classes', label: '📚 Classes / Workshops' },
-//     { value: 'dance', label: '💃 Dance / Movement' },
-//     { value: 'festival', label: '🎪 Festival / Fair' },
-//     { value: 'games', label: '🎲 Games' },
-//     { value: 'gardening', label: '🌱 Gardening' },
-//     { value: 'hiking', label: '🥾 Hiking' },
-//     { value: 'indoor', label: '🏠 Indoor Fun' },
-//     { value: 'music', label: '🎶 Music' },
-//     { value: 'outdoor', label: '🌳 Outdoor Fun' },
-//     { value: 'park', label: '🏞️ Park Visit' },
-//     { value: 'puzzles', label: '🧩 Puzzles & Brain Games' },
-//     { value: 'science_tech', label: '🔬 Science & Tech' },
-//     { value: 'storytelling', label: '📖 Storytelling / Reading' },
-//     { value: 'travel', label: '✈️ Trips & Excursions' },
-//     { value: 'video_games', label: '🎮 Video Games' },
-//     { value: 'volunteering', label: '🤝 Volunteering' },
-//     { value: 'sports', label: '🏀 Sports' },
-//     { value: 'zoo_aquarium', label: '🦁 Zoo / Aquarium' }
-//   ]
-// };
-
-// // Mock activities data
-// const mockActivities = [
-//   {
-//     id: 1,
-//     title: "Nature Scavenger Hunt",
-//     description: "Create a list of items to find outdoors and explore your local park or backyard",
-//     done: false,
-//     assignee_name: "Emma",
-//     costs: ['free'],
-//     durations: ['medium'],
-//     participants: ['family'],
-//     locations: ['local'],
-//     seasons: ['spring', 'summer', 'fall'],
-//     age_groups: ['child', 'tween'],
-//     themes: ['nature', 'adventure'],
-//     types: ['outdoor', 'park']
-//   },
-//   {
-//     id: 2,
-//     title: "DIY Science Volcano",
-//     description: "Build and erupt a volcano using baking soda, vinegar, and food coloring",
-//     done: true,
-//     assignee_name: "Alex",
-//     costs: ['low'],
-//     durations: ['short'],
-//     participants: ['family'],
-//     locations: ['home_outdoor'],
-//     seasons: ['all'],
-//     age_groups: ['child', 'tween'],
-//     themes: ['educational', 'creative'],
-//     types: ['science_tech']
-//   },
-//   {
-//     id: 3,
-//     title: "Family Game Night",
-//     description: "Set up a rotating tournament of board games with snacks and prizes",
-//     done: false,
-//     assignee_name: "Family",
-//     costs: ['free'],
-//     durations: ['long'],
-//     participants: ['family'],
-//     locations: ['home_indoor'],
-//     seasons: ['all'],
-//     age_groups: ['family'],
-//     themes: ['social', 'relaxation'],
-//     types: ['board_games', 'games']
-//   },
-//   {
-//     id: 4,
-//     title: "Cooking Adventure: Pizza Making",
-//     description: "Make homemade pizza from scratch with custom toppings for everyone",
-//     done: false,
-//     assignee_name: "Family",
-//     costs: ['medium'],
-//     durations: ['medium'],
-//     participants: ['family'],
-//     locations: ['home_indoor'],
-//     seasons: ['all'],
-//     age_groups: ['child', 'tween', 'teen'],
-//     themes: ['food_drink', 'creative'],
-//     types: ['indoor']
-//   },
-//   {
-//     id: 5,
-//     title: "Backyard Obstacle Course",
-//     description: "Design and build an obstacle course using household items and yard materials",
-//     done: false,
-//     assignee_name: "Jordan",
-//     costs: ['free'],
-//     durations: ['long'],
-//     participants: ['small_group'],
-//     locations: ['home_outdoor'],
-//     seasons: ['spring', 'summer', 'fall'],
-//     age_groups: ['child', 'tween'],
-//     themes: ['fitness', 'adventure'],
-//     types: ['outdoor']
-//   },
-//   {
-//     id: 6,
-//     title: "Art Gallery at Home",
-//     description: "Create artwork and set up a mini gallery with opening night celebration",
-//     done: false,
-//     assignee_name: "Emma",
-//     costs: ['low'],
-//     durations: ['full_day'],
-//     participants: ['family'],
-//     locations: ['home_indoor'],
-//     seasons: ['all'],
-//     age_groups: ['child', 'tween'],
-//     themes: ['creative', 'festive'],
-//     types: ['arts_crafts']
-//   }
-// ];
 type TagCategory =
   | 'themes'
   | 'types'
@@ -191,7 +24,7 @@ type TagCategory =
   | 'age_groups'
   | 'frequency';
 
-  type FilterValue =
+type FilterValue =
   | string
   | Duration
   | Participants
@@ -208,6 +41,11 @@ export default function ActivitiesBrowser() {
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newActivityText, setNewActivityText] = useState('');
+  const [addingActivity, setAddingActivity] = useState(false);
+  const [editingActivity, setEditingActivity] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState({ title: '', description: '' });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -215,7 +53,7 @@ export default function ActivitiesBrowser() {
         setLoading(true);
         const [fetchedFilters, fetchedActivities] = await Promise.all([
           ActivitiesService.getActivityFiltersApiV1ActivitiesFiltersGet(),
-          ActivitiesService.getActivitiesApiV1ActivitiesGet({})
+          ActivitiesService.getActivitiesApiV1ActivitiesGet({}),
         ]);
         setFilters(fetchedFilters);
         setActivities(fetchedActivities);
@@ -231,16 +69,19 @@ export default function ActivitiesBrowser() {
 
   // Filter activities based on search term and selected filters
   const filteredActivities = useMemo(() => {
-    return activities.filter((activity: any) => {
+    return activities.filter((activity: ActivityResponse) => {
       if (
         searchTerm &&
         !activity.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !activity.description.toLowerCase().includes(searchTerm.toLowerCase())
+        !(activity.description ?? '').toLowerCase().includes(searchTerm.toLowerCase())
       ) {
         return false;
       }
 
-      for (const [filterType, selectedValues] of Object.entries(selectedFilters)) {
+      for (const [filterType, selectedValues] of Object.entries(selectedFilters) as [
+        TagCategory,
+        string[],
+      ][]) {
         if (selectedValues.length > 0) {
           const activityValues = activity[filterType] || [];
           const hasMatch = selectedValues.some((value) => activityValues.includes(value));
@@ -274,10 +115,94 @@ export default function ActivitiesBrowser() {
 
   const toggleActivity = async (activityId: number) => {
     try {
-      const updated = await ActivitiesService.toggleActivityApiV1ActivitiesActivityIdTogglePost({ activityId });
+      const updated = await ActivitiesService.toggleActivityApiV1ActivitiesActivityIdTogglePost({
+        activityId,
+      });
       setActivities((prev) => prev.map((a) => (a.id === activityId ? updated : a)));
     } catch (err) {
       console.error('Failed to toggle activity:', err);
+    }
+  };
+
+  const deleteActivity = async (activityId: number) => {
+    if (!confirm('Are you sure you want to delete this activity?')) return;
+
+    try {
+      await ActivitiesService.deleteActivityApiV1ActivitiesActivityIdDelete({ activityId });
+      setActivities((prev) => prev.filter((a) => a.id !== activityId));
+    } catch (err) {
+      console.error('Failed to delete activity:', err);
+    }
+  };
+
+  const startEdit = (activity: ActivityResponse) => {
+    setEditingActivity(activity.id);
+    setEditForm({
+      title: activity.title ?? '',
+      description: activity.description ?? '',
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingActivity(null);
+    setEditForm({ title: '', description: '' });
+  };
+
+  const saveEdit = async () => {
+    if (!editingActivity) return;
+
+    try {
+      await ActivitiesService.updateActivityApiV1ActivitiesActivityIdPatch({
+        activityId: editingActivity,
+        requestBody: editForm,
+      });
+      setActivities((prev) =>
+        prev.map((a) =>
+          a.id === editingActivity
+            ? { ...a, title: editForm.title, description: editForm.description }
+            : a
+        )
+      );
+      setEditingActivity(null);
+      setEditForm({ title: '', description: '' });
+    } catch (err) {
+      console.error('Failed to update activity:', err);
+    }
+  };
+
+  const addActivities = async () => {
+    if (!newActivityText.trim()) return;
+
+    try {
+      setAddingActivity(true);
+
+      // Call LLM tagging API
+      const response = await LlmService.tagActivitiesApiV1LlmLlmTagActivitiesPost({
+        requestBody: { activities: newActivityText.trim() },
+      });
+
+      // Response shape: { tagged_activities: TaggedActivity[], total_count: number }
+      const { tagged_activities } = response;
+
+      if (!tagged_activities || tagged_activities.length === 0) {
+        throw new Error('No activities were tagged');
+      }
+
+      // Map tagged activities into your local Activity shape
+      const newActivities = tagged_activities.map((tagged) => ({
+        ...tagged,
+      }));
+
+      // Prepend new activities
+      setActivities((prev) => [...newActivities, ...prev]);
+
+      setNewActivityText('');
+      setShowAddModal(false);
+    } catch (err) {
+      console.error('Failed to add activity:', err);
+      alert('Failed to add activity. Please try again.');
+    } finally {
+      setAddingActivity(false);
     }
   };
 
@@ -291,29 +216,37 @@ export default function ActivitiesBrowser() {
       participants: 'bg-pink-100 text-pink-800',
       seasons: 'bg-orange-100 text-orange-800',
       age_groups: 'bg-teal-100 text-teal-800',
-      frequency: 'bg-red-100 text-red-800'
+      frequency: 'bg-red-100 text-red-800',
     };
-  
+
     return colorMap[type];
   };
 
-  const getFilterLabel = (
-    type: keyof typeof filters,
-    value?: FilterValue
-  ): string => {
+  const getFilterLabel = (type: keyof typeof filters, value?: FilterValue): string => {
     if (!value) return '';
-    return filters[type]?.find(f => f.value === String(value))?.label ?? String(value);
+    return filters[type]?.find((f) => f.value === String(value))?.label ?? String(value);
   };
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+          <p className="text-gray-600">Loading activities...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      <div className="sticky top-0 z-50 border-b bg-white shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between">
             <div className="flex items-center space-x-4">
-              <button 
-                onClick={() => window.history.back()} 
+              <button
+                onClick={() => window.history.back()}
                 className="text-sm font-medium text-gray-600 hover:text-gray-900"
               >
                 ← Back to Dashboard
@@ -321,7 +254,10 @@ export default function ActivitiesBrowser() {
               <h1 className="text-2xl font-bold text-gray-900">Activity Explorer</h1>
             </div>
             <div className="flex items-center space-x-3">
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center space-x-2">
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="flex items-center space-x-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
+              >
                 <Plus size={18} />
                 <span>Add Activity</span>
               </button>
@@ -330,19 +266,22 @@ export default function ActivitiesBrowser() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Search and Filter Controls */}
         <div className="mb-8">
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+          <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
             {/* Search Bar */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <div className="relative max-w-md flex-1">
+              <Search
+                className="absolute top-1/2 left-3 -translate-y-1/2 transform text-gray-400"
+                size={20}
+              />
               <input
                 type="text"
                 placeholder="Search activities..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                className="w-full rounded-lg border border-gray-300 bg-white py-3 pr-4 pl-10 shadow-sm focus:border-transparent focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -350,23 +289,25 @@ export default function ActivitiesBrowser() {
             <div className="flex items-center space-x-3">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center space-x-2 px-4 py-3 rounded-lg font-medium transition-colors ${
-                  showFilters ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                className={`flex items-center space-x-2 rounded-lg px-4 py-3 font-medium transition-colors ${
+                  showFilters
+                    ? 'bg-blue-600 text-white'
+                    : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
                 }`}
               >
                 <Filter size={18} />
                 <span>Filters</span>
                 {getTotalActiveFilters() > 0 && (
-                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                  <span className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-800">
                     {getTotalActiveFilters()}
                   </span>
                 )}
               </button>
-              
+
               {getTotalActiveFilters() > 0 && (
                 <button
                   onClick={clearAllFilters}
-                  className="text-gray-500 hover:text-gray-700 text-sm font-medium"
+                  className="text-sm font-medium text-gray-500 hover:text-gray-700"
                 >
                   Clear all
                 </button>
@@ -376,22 +317,28 @@ export default function ActivitiesBrowser() {
 
           {/* Filters Panel */}
           {showFilters && (
-            <div className="mt-6 bg-white rounded-xl shadow-lg border p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="mt-6 rounded-xl border bg-white p-6 shadow-lg">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {Object.entries(filters).map(([filterType, options]) => (
                   <div key={filterType}>
-                    <h3 className="font-semibold text-gray-900 mb-3 capitalize">
+                    <h3 className="mb-3 font-semibold text-gray-900 capitalize">
                       {filterType.replace('_', ' ')}
                     </h3>
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
-                      {options.map(option => {
-                        const isSelected = selectedFilters[filterType]?.includes(option.value) || false;
+                    <div className="max-h-40 space-y-2 overflow-y-auto">
+                      {options.map((option) => {
+                        const isSelected =
+                          selectedFilters[filterType]?.includes(option.value) || false;
                         return (
-                          <label key={option.value} className="flex items-center space-x-2 cursor-pointer">
+                          <label
+                            key={option.value}
+                            className="flex cursor-pointer items-center space-x-2"
+                          >
                             <input
                               type="checkbox"
                               checked={isSelected}
-                              onChange={(e) => handleFilterChange(filterType, option.value, e.target.checked)}
+                              onChange={(e) =>
+                                handleFilterChange(filterType, option.value, e.target.checked)
+                              }
                               className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                             />
                             <span className="text-sm text-gray-700">{option.label}</span>
@@ -409,142 +356,274 @@ export default function ActivitiesBrowser() {
         {/* Results Summary */}
         <div className="mb-6">
           <p className="text-gray-600">
-            Showing <span className="font-semibold text-gray-900">{filteredActivities.length}</span> activities
-            {searchTerm && <span> matching "<span className="font-medium">{searchTerm}</span>"</span>}
+            Showing <span className="font-semibold text-gray-900">{filteredActivities.length}</span>{' '}
+            activities
+            {searchTerm && (
+              <span>
+                {' '}
+                matching "<span className="font-medium">{searchTerm}</span>"
+              </span>
+            )}
           </p>
         </div>
 
         {/* Activities Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredActivities.map(activity => (
-            <div key={activity.id} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 border border-gray-100 overflow-hidden group">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {filteredActivities.map((activity) => (
+            <div
+              key={activity.id}
+              className="group overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md transition-all duration-200 hover:shadow-lg"
+            >
               {/* Card Header */}
               <div className="p-6">
-                <div className="flex items-start justify-between mb-3">
+                <div className="mb-3 flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="font-bold text-lg text-gray-900 group-hover:text-blue-600 transition-colors">
-                      {activity.title}
-                    </h3>
-                    {/* <p className="text-sm text-gray-500 mt-1">
-                      Assigned to: <span className="font-medium">{activity.assignee_name}</span>
-                    </p> */}
-                    <p className="text-sm text-gray-500 mt-1">
-                      Assigned to: <span className="font-medium">Family</span>
+                    {editingActivity === activity.id ? (
+                      <div className="space-y-3">
+                        <input
+                          type="text"
+                          value={editForm.title}
+                          onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                          className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+                          placeholder="Activity title"
+                        />
+                        <textarea
+                          value={editForm.description}
+                          onChange={(e) =>
+                            setEditForm({ ...editForm, description: e.target.value })
+                          }
+                          className="w-full resize-none rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+                          rows={3}
+                          placeholder="Activity description"
+                        />
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={saveEdit}
+                            className="flex items-center space-x-1 rounded-md bg-green-600 px-3 py-1 text-sm text-white transition-colors hover:bg-green-700"
+                          >
+                            <Check size={14} />
+                            <span>Save</span>
+                          </button>
+                          <button
+                            onClick={cancelEdit}
+                            className="flex items-center space-x-1 rounded-md bg-gray-500 px-3 py-1 text-sm text-white transition-colors hover:bg-gray-600"
+                          >
+                            <X size={14} />
+                            <span>Cancel</span>
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <h3 className="text-lg font-bold text-gray-900 transition-colors group-hover:text-blue-600">
+                          {activity.title}
+                        </h3>
+                        <p className="mt-1 text-sm text-gray-500">
+                          Assigned to: <span className="font-medium">Family</span>
+                        </p>
+                      </>
+                    )}
+                  </div>
+
+                  {editingActivity !== activity.id && (
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => startEdit(activity)}
+                        className="p-1 text-gray-400 transition-colors hover:text-blue-600"
+                        title="Edit activity"
+                      >
+                        <Edit3 size={16} />
+                      </button>
+                      <button
+                        onClick={() => deleteActivity(activity.id)}
+                        className="p-1 text-gray-400 transition-colors hover:text-red-600"
+                        title="Delete activity"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => toggleActivity(activity.id)}
+                        className="text-2xl transition-transform hover:scale-110"
+                        title={activity.done ? 'Mark as incomplete' : 'Mark as complete'}
+                      >
+                        {activity.done ? '✅' : '⬜️'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {editingActivity !== activity.id && (
+                  <>
+                    <p className="mb-4 line-clamp-2 text-sm text-gray-600">
+                      {activity.description}
                     </p>
-                  </div>
-                  <button
-                    onClick={() => toggleActivity(activity.id)}
-                    className="text-2xl hover:scale-110 transition-transform"
-                    title={activity.done ? 'Mark as incomplete' : 'Mark as complete'}
-                  >
-                    {activity.done ? '✅' : '⬜️'}
-                  </button>
-                </div>
 
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                  {activity.description}
-                </p>
-
-                {/* Quick Info Icons */}
-                <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
-                  <div className="flex items-center space-x-1">
-                    <Clock size={14} />
-                    <span>{getFilterLabel('durations', activity.durations?.[0])}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Users size={14} />
-                    <span>{getFilterLabel('participants', activity.participants?.[0])}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <MapPin size={14} />
-                    <span>{getFilterLabel('locations', activity.locations?.[0])}</span>
-                  </div>
-                </div>
-
-                {/* Tags */}
-                <div className="space-y-2">
-                  {/* Themes */}
-                  {activity.themes?.length ? (
-                    <div className="flex flex-wrap gap-1">
-                      {activity.themes.slice(0, 2).map(theme => (
-                        <span
-                          key={theme}
-                          className={`text-xs px-2 py-1 rounded-full font-medium ${getTagColor('themes')}`}
-                        >
-                          {getFilterLabel('themes', theme)}
-                        </span>
-                      ))}
-                      {activity.themes.length > 2 && (
-                        <span className="text-xs px-2 py-1 rounded-full font-medium bg-gray-100 text-gray-600">
-                          +{activity.themes.length - 2} more
-                        </span>
-                      )}
+                    {/* Quick Info Icons */}
+                    <div className="mb-4 flex items-center space-x-4 text-sm text-gray-500">
+                      <div className="flex items-center space-x-1">
+                        <Clock size={14} />
+                        <span>{getFilterLabel('durations', activity.durations?.[0])}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Users size={14} />
+                        <span>{getFilterLabel('participants', activity.participants?.[0])}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <MapPin size={14} />
+                        <span>{getFilterLabel('locations', activity.locations?.[0])}</span>
+                      </div>
                     </div>
-                  ) : null}
 
-                  {/* Activity Types */}
-                  {activity.types?.length ? (
-                    <div className="flex flex-wrap gap-1">
-                      {activity.types.slice(0, 2).map(type => (
-                        <span
-                          key={type}
-                          className={`text-xs px-2 py-1 rounded-full font-medium ${getTagColor('types')}`}
-                        >
-                          {getFilterLabel('activity_types', type)}
-                        </span>
-                      ))}
-                      {activity.types.length > 2 && (
-                        <span className="text-xs px-2 py-1 rounded-full font-medium bg-gray-100 text-gray-600">
-                          +{activity.types.length - 2} more
-                        </span>
-                      )}
+                    {/* Tags */}
+                    <div className="space-y-2">
+                      {/* Themes */}
+                      {activity.themes?.length ? (
+                        <div className="flex flex-wrap gap-1">
+                          {activity.themes.slice(0, 2).map((theme) => (
+                            <span
+                              key={theme}
+                              className={`rounded-full px-2 py-1 text-xs font-medium ${getTagColor('themes')}`}
+                            >
+                              {getFilterLabel('themes', theme)}
+                            </span>
+                          ))}
+                          {activity.themes.length > 2 && (
+                            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+                              +{activity.themes.length - 2} more
+                            </span>
+                          )}
+                        </div>
+                      ) : null}
+
+                      {/* Activity Types */}
+                      {activity.types?.length ? (
+                        <div className="flex flex-wrap gap-1">
+                          {activity.types.slice(0, 2).map((type) => (
+                            <span
+                              key={type}
+                              className={`rounded-full px-2 py-1 text-xs font-medium ${getTagColor('types')}`}
+                            >
+                              {getFilterLabel('activity_types', type)}
+                            </span>
+                          ))}
+                          {activity.types.length > 2 && (
+                            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+                              +{activity.types.length - 2} more
+                            </span>
+                          )}
+                        </div>
+                      ) : null}
                     </div>
-                  ) : null}
-
-                </div>
+                  </>
+                )}
               </div>
 
               {/* Card Actions */}
-              <div className="px-6 py-4 bg-gray-50 border-t flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  {activity.costs?.includes('free' as unknown as Cost) && (
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded font-medium">
-                      FREE
-                    </span>
-                  )}
-                  {activity.age_groups?.slice(0, 1).map(age => (
-                    <span key={String(age)} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">
-                      {getFilterLabel('age_groups', age)}
-                    </span>
-                  ))}
+              {editingActivity !== activity.id && (
+                <div className="flex items-center justify-between border-t bg-gray-50 px-6 py-4">
+                  <div className="flex items-center space-x-2">
+                    {activity.costs?.includes('free' as unknown as Cost) && (
+                      <span className="rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+                        FREE
+                      </span>
+                    )}
+                    {activity.age_groups?.slice(0, 1).map((age) => (
+                      <span
+                        key={String(age)}
+                        className="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
+                      >
+                        {getFilterLabel('age_groups', age)}
+                      </span>
+                    ))}
+                  </div>
+                  <button className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline">
+                    View Details
+                  </button>
                 </div>
-                <button className="text-blue-600 hover:text-blue-700 text-sm font-medium hover:underline">
-                  View Details
-                </button>
-              </div>
+              )}
             </div>
           ))}
         </div>
 
         {/* Empty State */}
         {filteredActivities.length === 0 && (
-          <div className="text-center py-16">
+          <div className="py-16 text-center">
             <div className="mb-4">
               <Search className="mx-auto text-gray-400" size={64} />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No activities found</h3>
-            <p className="text-gray-600 mb-6">
+            <h3 className="mb-2 text-xl font-semibold text-gray-900">No activities found</h3>
+            <p className="mb-6 text-gray-600">
               Try adjusting your search terms or filters to find more activities.
             </p>
             <button
               onClick={clearAllFilters}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              className="rounded-lg bg-blue-600 px-6 py-3 font-medium text-white transition-colors hover:bg-blue-700"
             >
               Clear All Filters
             </button>
           </div>
         )}
       </div>
+
+      {/* Add Activity Modal */}
+      {showAddModal && (
+        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
+          <div className="mx-4 w-full max-w-lg rounded-xl bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b p-6">
+              <h2 className="text-xl font-bold text-gray-900">Add New Activity</h2>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <label className="mb-2 block text-sm font-medium text-gray-700">
+                Describe your activity idea
+              </label>
+              <textarea
+                value={newActivityText}
+                onChange={(e) => setNewActivityText(e.target.value)}
+                placeholder="e.g., Make homemade pizza with the kids on a rainy Sunday afternoon, or Set up an outdoor obstacle course in the backyard for summer fun"
+                className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+                rows={4}
+              />
+              <p className="mt-2 text-sm text-gray-500">
+                Just describe your idea in natural language. Our AI will automatically organize it
+                and add appropriate tags!
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end space-x-3 border-t bg-gray-50 p-6">
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="rounded-lg bg-gray-200 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={addActivities}
+                disabled={!newActivityText.trim() || addingActivity}
+                className="flex items-center space-x-2 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+              >
+                {addingActivity ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus size={16} />
+                    <span>Add Activity</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

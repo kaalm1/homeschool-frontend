@@ -289,6 +289,142 @@ export default function ActivitiesBrowser() {
     return filters[type]?.find((f) => f.value === String(value))?.label ?? String(value);
   };
 
+  // Helper function to format participants display
+  const formatParticipants = (participants?: Participants[]): string => {
+    if (!participants?.length) return '';
+
+    if (participants.includes('family' as Participants)) {
+      return '∞'; // Infinity symbol for family/unlimited
+    }
+
+    // Sort participants by typical order and get min-max range
+    const playerCounts = participants
+      .filter((p) => p !== 'family')
+      .map((p) => {
+        if (p === 'two_player') return 2;
+        if (p === 'small_group') return 3;
+        if (p === 'medium_group') return 6;
+        if (p === 'large_group') return 10;
+        if (p === 'solo') return 1;
+        return 0;
+      })
+      .filter((n) => n > 0)
+      .sort((a, b) => a - b);
+
+    if (playerCounts.length === 0) return '';
+    if (playerCounts.length === 1) {
+      const count = playerCounts[0];
+      if (count === 1) return '1';
+      if (count === 2) return '2';
+      if (count === 10) return '10+';
+      if (count === 6) return '6-10';
+      if (count === 3) return '3-5';
+      return String(count);
+    }
+
+    const min = playerCounts[0];
+    const max = playerCounts[playerCounts.length - 1];
+
+    if (min === 1 && max >= 10) return '1+';
+    if (min === 2 && max >= 10) return '2+';
+    if (min === 3 && max >= 10) return '3+';
+
+    return `${min}-${max === 10 ? '10+' : max}`;
+  };
+
+  // Helper function to format age groups display
+  const formatAgeGroups = (ageGroups?: AgeGroup[]): string => {
+    if (!ageGroups?.length) return '';
+
+    const allAges = ['toddler', 'child', 'tween', 'teen', 'adult', 'family'];
+    const selectedAges = ageGroups.filter((age) => allAges.includes(age as string));
+
+    // If family is included, it's for all ages
+    if (selectedAges.includes('family' as AgeGroup)) {
+      return 'All Ages';
+    }
+
+    // If all specific age groups are selected
+    if (selectedAges.length >= 4 && selectedAges.includes('toddler' as AgeGroup)) {
+      return 'All Ages';
+    }
+
+    // If all except toddler
+    if (selectedAges.length >= 3 && !selectedAges.includes('toddler' as AgeGroup)) {
+      return 'Kids+';
+    }
+
+    // If just one age group
+    if (selectedAges.length === 1) {
+      return getFilterLabel('age_groups', selectedAges[0]);
+    }
+
+    // For multiple but not all, show range or count
+    if (selectedAges.length === 2) {
+      const labels = selectedAges.map((age) => getFilterLabel('age_groups', age));
+      return labels.join(', ');
+    }
+
+    return `${selectedAges.length} Age Groups`;
+  };
+
+  // Helper function to format cost display
+  const formatCost = (costs?: Cost[]): string => {
+    if (!costs?.length) return '';
+
+    if (costs.includes('free' as Cost)) {
+      if (costs.length === 1) return 'FREE';
+      return 'FREE+'; // Has free options plus paid
+    }
+
+    // Map cost levels to symbols
+    const costSymbols = costs
+      .map((cost) => {
+        if (cost === 'low') return '$';
+        if (cost === 'medium') return '$$';
+        if (cost === 'high') return '$$$';
+        return cost;
+      })
+      .filter(Boolean);
+
+    if (costSymbols.length === 1) return costSymbols[0];
+    if (costSymbols.length > 1) return `${costSymbols[0]}-${costSymbols[costSymbols.length - 1]}`;
+
+    return '';
+  };
+
+  // Helper function to get season display
+  const formatSeasons = (seasons?: Season[]): string => {
+    if (!seasons?.length) return '';
+
+    // Check if "all" seasons is selected
+    if (seasons.includes('all' as Season)) return 'Year-round';
+
+    const seasonEmojis: Record<string, string> = {
+      spring: '🌸',
+      summer: '☀️',
+      fall: '🍂',
+      winter: '❄️',
+      rainy_day: '🌧️',
+      snowy_day: '☃️',
+    };
+
+    const standardSeasons = ['spring', 'summer', 'fall', 'winter'];
+    const selectedStandardSeasons = seasons.filter((s) => standardSeasons.includes(s as string));
+
+    if (selectedStandardSeasons.length === 4) return 'Year-round';
+    if (seasons.length === 1)
+      return seasonEmojis[seasons[0] as string] || getFilterLabel('seasons', seasons[0]);
+    if (seasons.length <= 3) {
+      return seasons
+        .map((s) => seasonEmojis[s as string])
+        .filter(Boolean)
+        .join('');
+    }
+
+    return `${seasons.length} Seasons`;
+  };
+
   const TagCheckboxGroup = ({
     tagCategory,
     options,
@@ -650,7 +786,7 @@ export default function ActivitiesBrowser() {
                       </div>
                       <div className="flex items-center space-x-1">
                         <Users size={14} />
-                        <span>{getFilterLabel('participants', activity.participants?.[0])}</span>
+                        <span>{formatParticipants(activity.participants ?? undefined)}</span>
                       </div>
                       <div className="flex items-center space-x-1">
                         <MapPin size={14} />
@@ -706,23 +842,26 @@ export default function ActivitiesBrowser() {
               {editingActivity !== activity.id && (
                 <div className="flex items-center justify-between border-t bg-gray-50 px-6 py-4">
                   <div className="flex items-center space-x-2">
-                    {activity.costs?.includes('free' as unknown as Cost) && (
-                      <span className="rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
-                        FREE
+                    {activity.costs?.length && (
+                      <span
+                        className={`rounded px-2 py-1 text-xs font-medium ${
+                          activity.costs.includes('free' as Cost)
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}
+                      >
+                        {formatCost(activity.costs)}
                       </span>
                     )}
-                    {activity.age_groups?.slice(0, 1).map((age) => (
-                      <span
-                        key={String(age)}
-                        className="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800"
-                      >
-                        {getFilterLabel('age_groups', age)}
+                    {activity.age_groups?.length && (
+                      <span className="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+                        {formatAgeGroups(activity.age_groups)}
                       </span>
-                    ))}
+                    )}
                   </div>
-                  <button className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline">
+                  {/* <button className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline">
                     View Details
-                  </button>
+                  </button> */}
                 </div>
               )}
             </div>

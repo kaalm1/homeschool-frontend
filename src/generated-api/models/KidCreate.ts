@@ -6,13 +6,12 @@
  * Kid creation model.
  */
 export type KidCreate = {
-    /**
-     * Kid's name
-     */
-    name: string;
-    /**
-     * Kid's color (hex)
-     */
-    color?: string;
+  /**
+   * Kid's name
+   */
+  name: string;
+  /**
+   * Kid's color (hex)
+   */
+  color?: string;
 };
-

@@ -3,8 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export enum Cost {
-    FREE = 'free',
-    LOW = 'low',
-    MEDIUM = 'medium',
-    HIGH = 'high',
+  FREE = 'free',
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
 }

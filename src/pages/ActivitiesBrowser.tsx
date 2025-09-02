@@ -488,7 +488,7 @@ export default function ActivitiesBrowser() {
                 className="flex items-center space-x-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition-colors hover:bg-blue-700"
               >
                 <Plus size={18} />
-                <span>Add Activity</span>
+                <span>Add Activities</span>
               </button>
             </div>
           </div>
@@ -908,7 +908,7 @@ export default function ActivitiesBrowser() {
         <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
           <div className="mx-4 w-full max-w-lg rounded-xl bg-white shadow-xl">
             <div className="flex items-center justify-between border-b p-6">
-              <h2 className="text-xl font-bold text-gray-900">Add New Activity</h2>
+              <h2 className="text-xl font-bold text-gray-900">Add New Activities</h2>
               <button
                 onClick={() => setShowAddModal(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -954,7 +954,7 @@ export default function ActivitiesBrowser() {
                 ) : (
                   <>
                     <Plus size={16} />
-                    <span>Add Activity</span>
+                    <span>Add Activities</span>
                   </>
                 )}
               </button>

@@ -30,7 +30,7 @@ export function hasFilterMatch(
   filterType: TagCategory,
   selectedValues: string[]
 ): boolean {
-  const activityValue = activity[filterType];
+  const activityValue = activity[filterType] as string | string[] | undefined;
 
   if (!activityValue) return false;
 

@@ -771,13 +771,13 @@ export default function ActivitiesBrowser() {
                       >
                         <Trash2 size={16} />
                       </button>
-                      <button
+                      {/* <button
                         onClick={() => toggleActivity(activity.id)}
                         className="text-2xl transition-transform hover:scale-110"
                         title={activity.done ? 'Mark as incomplete' : 'Mark as complete'}
                       >
                         {activity.done ? '✅' : '⬜️'}
-                      </button>
+                      </button> */}
                     </div>
                   )}
                 </div>

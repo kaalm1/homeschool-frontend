@@ -20,6 +20,35 @@ import {
 } from '@/components/SearchAndFilter';
 import { Star, StarOff } from 'lucide-react';
 
+export enum WeekStatus {
+  Past = 'past',
+  Current = 'current',
+  Future = 'future',
+}
+
+// Helper function to get ISO week number
+export function getISOWeek(date: Date): number {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+}
+
+export function getWeekStatus(year: number, week: number): WeekStatus {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentWeek = getISOWeek(today);
+
+  if (year < currentYear) return WeekStatus.Past;
+  if (year > currentYear) return WeekStatus.Future;
+
+  // same year
+  if (week < currentWeek) return WeekStatus.Past;
+  if (week > currentWeek) return WeekStatus.Future;
+  return WeekStatus.Current;
+}
+
 export default function ParentDashboard() {
   const [kids, setKids] = useState<KidResponse[]>([]);
   const [allActivities, setAllActivities] = useState<ActivityResponse[]>([]);
@@ -38,15 +67,6 @@ export default function ParentDashboard() {
   });
 
   const filteredActivities = useActivityFiltering(availableActivities, searchTerm, selectedFilters);
-
-  // Helper function to get ISO week number
-  function getISOWeek(date: Date): number {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    const dayNum = d.getUTCDay() || 7;
-    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
-  }
 
   useEffect(() => {
     fetchData();
@@ -190,8 +210,8 @@ export default function ParentDashboard() {
     setSelectedYear(newYear);
   }
 
-  const isCurrentWeek =
-    selectedYear === new Date().getFullYear() && selectedWeek === getISOWeek(new Date());
+  const weekStatus = getWeekStatus(selectedYear, selectedWeek);
+  const isCurrentWeek = weekStatus === WeekStatus.Current;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-4">
@@ -271,14 +291,16 @@ export default function ParentDashboard() {
       <div className="rounded-lg bg-white p-6 shadow-md">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-xl font-semibold">Family Activities</h3>
-          <button
-            onClick={() => {
-              setShowAddActivityModal(true);
-            }}
-            className="rounded-md bg-purple-500 px-4 py-2 text-white hover:bg-purple-600"
-          >
-            + Add Family Activity
-          </button>
+          {weekStatus != WeekStatus.Past && (
+            <button
+              onClick={() => {
+                setShowAddActivityModal(true);
+              }}
+              className="rounded-md bg-purple-500 px-4 py-2 text-white hover:bg-purple-600"
+            >
+              + Add Family Activity
+            </button>
+          )}
         </div>
 
         <div className="space-y-3">
@@ -316,27 +338,29 @@ export default function ParentDashboard() {
               </div>
 
               {/* Rating Section */}
-              <div className="mt-3 flex items-center space-x-4">
-                <span className="text-sm text-gray-600">Family Rating:</span>
-                <div className="flex space-x-1">
-                  {[1, 2, 3, 4, 5].map((star) => {
-                    const isFilled = (wa.rating || 0) >= star;
-                    return (
-                      <button
-                        key={star}
-                        onClick={() => updateWeekActivityRating(wa.id, star)}
-                        className="hover:text-yellow-400"
-                      >
-                        {isFilled ? (
-                          <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                        ) : (
-                          <Star className="h-5 w-5 text-gray-300" />
-                        )}
-                      </button>
-                    );
-                  })}
+              {weekStatus !== WeekStatus.Future && (
+                <div className="mt-3 flex items-center space-x-4">
+                  <span className="text-sm text-gray-600">Family Rating:</span>
+                  <div className="flex space-x-1">
+                    {[1, 2, 3, 4, 5].map((star) => {
+                      const isFilled = (wa.rating || 0) >= star;
+                      return (
+                        <button
+                          key={star}
+                          onClick={() => updateWeekActivityRating(wa.id, star)}
+                          className="hover:text-yellow-400"
+                        >
+                          {isFilled ? (
+                            <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                          ) : (
+                            <Star className="h-5 w-5 text-gray-300" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Notes input */}
               <div className="mt-2">
@@ -362,14 +386,16 @@ export default function ParentDashboard() {
               <p className="mt-1 text-sm">
                 Add activities that the whole family can enjoy together!
               </p>
-              <button
-                onClick={() => {
-                  setShowAddActivityModal(true);
-                }}
-                className="mt-3 font-medium text-purple-600 hover:text-purple-800"
-              >
-                Add the first family activity
-              </button>
+              {weekStatus != WeekStatus.Past && (
+                <button
+                  onClick={() => {
+                    setShowAddActivityModal(true);
+                  }}
+                  className="mt-3 font-medium text-purple-600 hover:text-purple-800"
+                >
+                  Add the first family activity
+                </button>
+              )}
             </div>
           )}
         </div>

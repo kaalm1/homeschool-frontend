@@ -291,7 +291,7 @@ export default function ParentDashboard() {
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h4 className="flex items-center font-medium">👨‍👩‍👧‍👦 {wa.activity_title}</h4>
+                  <h4 className="flex items-center font-medium">{wa.activity_title}</h4>
                   {wa.activity_description && (
                     <p className="mt-1 text-sm text-gray-600">{wa.activity_description}</p>
                   )}
@@ -436,18 +436,20 @@ export default function ParentDashboard() {
 
             {/* Activities List */}
             <div className="max-h-96 overflow-y-auto p-4">
-              {filteredActivities.map((activity) => (
-                <div
-                  key={activity.id}
-                  onClick={() => addActivityToWeek(activity.id)}
-                  className="w-full cursor-pointer rounded-md border p-4 transition-colors hover:border-blue-300 hover:bg-blue-50"
-                >
-                  <div className="text-lg font-medium">{activity.title}</div>
-                  {activity.description && (
-                    <div className="mt-2 text-sm text-gray-600">{activity.description}</div>
-                  )}
-                </div>
-              ))}
+              {filteredActivities
+                .filter((activity) => !weekActivities.some((wa) => wa.activity_id === activity.id))
+                .map((activity) => (
+                  <div
+                    key={activity.id}
+                    onClick={() => addActivityToWeek(activity.id)}
+                    className="w-full cursor-pointer rounded-md border p-4 transition-colors hover:border-blue-300 hover:bg-blue-50"
+                  >
+                    <div className="text-lg font-medium">{activity.title}</div>
+                    {activity.description && (
+                      <div className="mt-2 text-sm text-gray-600">{activity.description}</div>
+                    )}
+                  </div>
+                ))}
 
               {/* Empty State */}
               {filteredActivities.length === 0 && (

@@ -18,7 +18,7 @@ import {
   useActivityFiltering,
   extractFiltersFromActivities,
 } from '@/components/SearchAndFilter';
-import { Star, StarOff } from 'lucide-react';
+import { Star, StarOff, CheckSquare, Square, Trash2 } from 'lucide-react';
 
 export enum WeekStatus {
   Past = 'past',
@@ -325,14 +325,18 @@ export default function ParentDashboard() {
                     className="text-2xl transition-transform hover:scale-110"
                     title={wa.completed ? 'Mark as incomplete' : 'Mark as complete'}
                   >
-                    {wa.completed ? '✅' : '⬜️'}
+                    {wa.completed ? (
+                      <CheckSquare className="h-6 w-6 text-green-500" />
+                    ) : (
+                      <Square className="h-6 w-6 text-gray-400" />
+                    )}
                   </button>
                   <button
                     onClick={() => removeActivityFromWeek(null, wa.activity_id)} // Use null for family activities
                     className="text-red-500 hover:text-red-700"
                     title="Remove from week"
                   >
-                    ❌
+                    <Trash2 className="h-5 w-5" />
                   </button>
                 </div>
               </div>

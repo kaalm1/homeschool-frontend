@@ -79,18 +79,7 @@ enum Duration {
   MULTI_DAY = 'multi_day',
 }
 
-type ActivityResponse = {
-  created_at: string;
-  updated_at: string;
-  title: string;
-  description?: string | null;
-  primary_type?: ActivityType | null;
-  primary_theme?: Theme | null;
-  durations?: Duration[] | null;
-  id: number;
-  done: boolean;
-  kid_id?: number | null;
-};
+import { type ActivityResponse } from '@/generated-api';
 
 interface ActivitySelectorProps {
   activities: ActivityResponse[];
@@ -124,8 +113,8 @@ const ActivitySelector: React.FC<ActivitySelectorProps> = ({
   };
 
   // Icon mappings for activity types
-  const getActivityTypeIcon = (type?: ActivityType | null) => {
-    const iconMap = {
+  const getActivityTypeIcon = (type?: ActivityType | null, types?: ActivityType[] | null) => {
+    const iconMap: Record<ActivityType, React.ElementType> = {
       [ActivityType.AMUSEMENT_PARK]: PartyPopper,
       [ActivityType.ARTS_CRAFTS]: Palette,
       [ActivityType.BOARD_GAMES]: Gamepad2,
@@ -148,12 +137,27 @@ const ActivitySelector: React.FC<ActivitySelectorProps> = ({
       [ActivityType.SPORTS]: Trophy,
       [ActivityType.ZOO_AQUARIUM]: Fish,
     };
-    return iconMap[type as ActivityType] || Users;
+
+    // Prefer primary type if available
+    if (type && iconMap[type]) {
+      return iconMap[type];
+    }
+
+    // Fall back to first in types array
+    if (types && types.length > 0) {
+      const firstType = types[0];
+      if (iconMap[firstType]) {
+        return iconMap[firstType];
+      }
+    }
+
+    // Final fallback: generic icon
+    return Users;
   };
 
   // Theme color mappings
-  const getThemeColor = (theme?: Theme | null) => {
-    const colorMap = {
+  const getThemeColor = (theme?: Theme | null, themes?: Theme[] | null) => {
+    const colorMap: Record<Theme, string> = {
       [Theme.ADVENTURE]: 'bg-orange-100 text-orange-800',
       [Theme.CREATIVE]: 'bg-purple-100 text-purple-800',
       [Theme.EDUCATIONAL]: 'bg-blue-100 text-blue-800',
@@ -165,7 +169,10 @@ const ActivitySelector: React.FC<ActivitySelectorProps> = ({
       [Theme.RELAXATION]: 'bg-cyan-100 text-cyan-800',
       [Theme.SOCIAL]: 'bg-rose-100 text-rose-800',
     };
-    return colorMap[theme as Theme] || 'bg-gray-100 text-gray-800';
+
+    const selected = theme || (themes && themes.length > 0 ? themes[0] : null);
+
+    return selected && colorMap[selected] ? colorMap[selected] : 'bg-gray-100 text-gray-800';
   };
 
   // Duration display mapping
@@ -185,9 +192,11 @@ const ActivitySelector: React.FC<ActivitySelectorProps> = ({
   };
 
   // Format theme/type for display
-  const formatLabel = (value?: string | null) => {
-    if (!value) return '';
-    return value
+  const formatLabel = (value?: string | null, values?: string[] | null) => {
+    const label = value || (values && values.length > 0 ? values[0] : null);
+    if (!label) return '';
+
+    return label
       .split('_')
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
@@ -247,7 +256,10 @@ const ActivitySelector: React.FC<ActivitySelectorProps> = ({
         <div className="flex-1 overflow-y-auto p-6">
           <div className="space-y-3">
             {filteredActivities.map((activity) => {
-              const IconComponent = getActivityTypeIcon(activity.primary_type);
+              const IconComponent = getActivityTypeIcon(
+                activity.primary_type,
+                activity.activity_types
+              );
               return (
                 <div
                   key={activity.id}
@@ -279,20 +291,20 @@ const ActivitySelector: React.FC<ActivitySelectorProps> = ({
 
                       {/* Meta Information */}
                       <div className="mt-4 flex flex-wrap items-center gap-4">
-                        {activity.primary_theme && (
+                        {(activity.primary_theme || activity.themes) && (
                           <span
-                            className={`rounded-full px-3 py-1 text-xs font-medium ${getThemeColor(activity.primary_theme)}`}
+                            className={`rounded-full px-3 py-1 text-xs font-medium ${getThemeColor(activity.primary_theme, activity.themes)}`}
                           >
-                            {formatLabel(activity.primary_theme)}
+                            {formatLabel(activity.primary_theme, activity.themes)}
                           </span>
                         )}
                         <div className="flex items-center gap-1 text-xs text-gray-500">
                           <Clock className="h-3 w-3" />
                           {getDurationDisplay(activity.durations)}
                         </div>
-                        {activity.primary_type && (
+                        {(activity.primary_type || activity.activity_types) && (
                           <div className="text-xs text-gray-500">
-                            {formatLabel(activity.primary_type)}
+                            {formatLabel(activity.primary_type, activity.activity_types)}
                           </div>
                         )}
                       </div>

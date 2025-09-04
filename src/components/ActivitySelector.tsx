@@ -194,8 +194,14 @@ const ActivitySelector: React.FC<ActivitySelectorProps> = ({
   };
 
   return (
-    <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4">
-      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-white shadow-2xl">
+    <div
+      onClick={onClose}
+      className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-white shadow-2xl"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-100 p-6">
           <div>

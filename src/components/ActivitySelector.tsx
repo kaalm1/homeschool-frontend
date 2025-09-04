@@ -112,82 +112,6 @@ const ActivitySelector: React.FC<ActivitySelectorProps> = ({
   //   const [searchTerm, setSearchTerm] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Sample activities using your data structure
-  //   const activities: ActivityResponse[] = [
-  //     {
-  //       id: 1,
-  //       title: "Family game night",
-  //       description: "Pick board games and prepare snacks",
-  //       primary_type: ActivityType.BOARD_GAMES,
-  //       primary_theme: Theme.SOCIAL,
-  //       durations: [Duration.MEDIUM, Duration.LONG],
-  //       done: false,
-  //       kid_id: null,
-  //       created_at: "2024-01-01T00:00:00Z",
-  //       updated_at: "2024-01-01T00:00:00Z"
-  //     },
-  //     {
-  //       id: 2,
-  //       title: "Organize family photos",
-  //       description: "Sort and organize digital photos from this year",
-  //       primary_type: ActivityType.INDOOR,
-  //       primary_theme: Theme.CREATIVE,
-  //       durations: [Duration.MEDIUM],
-  //       done: false,
-  //       kid_id: null,
-  //       created_at: "2024-01-01T00:00:00Z",
-  //       updated_at: "2024-01-01T00:00:00Z"
-  //     },
-  //     {
-  //       id: 3,
-  //       title: "Read for 20 minutes",
-  //       description: "Continue reading chapter book",
-  //       primary_type: ActivityType.STORYTELLING,
-  //       primary_theme: Theme.EDUCATIONAL,
-  //       durations: [Duration.SHORT],
-  //       done: false,
-  //       kid_id: null,
-  //       created_at: "2024-01-01T00:00:00Z",
-  //       updated_at: "2024-01-01T00:00:00Z"
-  //     },
-  //     {
-  //       id: 4,
-  //       title: "Practice addition facts",
-  //       description: "Work on math skills with fun exercises",
-  //       primary_type: ActivityType.GAMES,
-  //       primary_theme: Theme.EDUCATIONAL,
-  //       durations: [Duration.SHORT],
-  //       done: false,
-  //       kid_id: null,
-  //       created_at: "2024-01-01T00:00:00Z",
-  //       updated_at: "2024-01-01T00:00:00Z"
-  //     },
-  //     {
-  //       id: 5,
-  //       title: "Nature scavenger hunt",
-  //       description: "Find items in nature and learn about the outdoors",
-  //       primary_type: ActivityType.OUTDOOR,
-  //       primary_theme: Theme.ADVENTURE,
-  //       durations: [Duration.MEDIUM],
-  //       done: false,
-  //       kid_id: null,
-  //       created_at: "2024-01-01T00:00:00Z",
-  //       updated_at: "2024-01-01T00:00:00Z"
-  //     },
-  //     {
-  //       id: 6,
-  //       title: "Art and craft session",
-  //       description: "Create colorful paintings and handmade crafts",
-  //       primary_type: ActivityType.ARTS_CRAFTS,
-  //       primary_theme: Theme.CREATIVE,
-  //       durations: [Duration.MEDIUM, Duration.LONG],
-  //       done: false,
-  //       kid_id: null,
-  //       created_at: "2024-01-01T00:00:00Z",
-  //       updated_at: "2024-01-01T00:00:00Z"
-  //     }
-  //   ];
-
   const filteredActivities = activities.filter(
     (activity) =>
       activity.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -196,8 +120,7 @@ const ActivitySelector: React.FC<ActivitySelectorProps> = ({
   );
 
   const addActivityToWeek = (activityId: number) => {
-    console.log('Adding activity:', activityId);
-    // Your existing logic here
+    onAddActivity(activityId);
   };
 
   // Icon mappings for activity types
@@ -279,7 +202,10 @@ const ActivitySelector: React.FC<ActivitySelectorProps> = ({
             <h2 className="text-2xl font-bold text-gray-900">Add Family Activity</h2>
             <p className="mt-1 text-sm text-gray-600">Choose an activity to add to your week</p>
           </div>
-          <button className="rounded-full p-2 transition-colors hover:bg-gray-100">
+          <button
+            onClick={onClose}
+            className="rounded-full p-2 transition-colors hover:bg-gray-100"
+          >
             <X className="h-6 w-6 text-gray-500" />
           </button>
         </div>
@@ -394,7 +320,7 @@ const ActivitySelector: React.FC<ActivitySelectorProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="rounded-b-2xl border-t border-gray-100 bg-gray-50 p-6">
+        {/* <div className="rounded-b-2xl border-t border-gray-100 bg-gray-50 p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Users className="h-4 w-4" />
@@ -404,7 +330,7 @@ const ActivitySelector: React.FC<ActivitySelectorProps> = ({
               Browse All Activities
             </button>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

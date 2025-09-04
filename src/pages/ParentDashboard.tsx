@@ -19,6 +19,7 @@ import {
   extractFiltersFromActivities,
 } from '@/components/SearchAndFilter';
 import { Star, StarOff, CheckSquare, Square, Trash2 } from 'lucide-react';
+import ActivitySelector from '@/components/ActivitySelector';
 
 export enum WeekStatus {
   Past = 'past',
@@ -407,104 +408,20 @@ export default function ParentDashboard() {
 
       {/* Add Activity Modal */}
       {showAddActivityModal && (
-        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
-          <div className="max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-lg bg-white shadow-xl">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b p-4">
-              <h3 className="text-lg font-semibold">'Add Family Activity'</h3>
-              <button
-                onClick={() => {
-                  setShowAddActivityModal(false);
-                  setSearchTerm('');
-                  setSelectedFilters({});
-                }}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Search + Filters */}
-            <div className="space-y-4 border-b p-4">
-              <SearchBar
-                searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
-                placeholder="Search activities..."
-              />
-
-              <div className="flex items-center justify-between">
-                <FilterToggle
-                  showFilters={showFilters}
-                  onToggle={() => setShowFilters(!showFilters)}
-                  activeFiltersCount={Object.values(selectedFilters).reduce(
-                    (acc, arr) => acc + arr.length,
-                    0
-                  )}
-                  onClearAll={() => setSelectedFilters({})}
-                />
-              </div>
-
-              <FilterPanel
-                filters={extractFiltersFromActivities(allActivities)}
-                selectedFilters={selectedFilters}
-                onFilterChange={(filterType, value, checked) => {
-                  setSelectedFilters((prev) => {
-                    const values = prev[filterType] || [];
-                    return {
-                      ...prev,
-                      [filterType]: checked
-                        ? [...values, value]
-                        : values.filter((v) => v !== value),
-                    };
-                  });
-                }}
-                showFilters={showFilters}
-              />
-
-              <ResultsSummary totalResults={filteredActivities.length} searchTerm={searchTerm} />
-            </div>
-
-            {/* Activities List */}
-            <div className="max-h-96 overflow-y-auto p-4">
-              {filteredActivities
-                .filter((activity) => !weekActivities.some((wa) => wa.activity_id === activity.id))
-                .map((activity) => (
-                  <div
-                    key={activity.id}
-                    onClick={() => addActivityToWeek(activity.id)}
-                    className="w-full cursor-pointer rounded-md border p-4 transition-colors hover:border-blue-300 hover:bg-blue-50"
-                  >
-                    <div className="text-lg font-medium">{activity.title}</div>
-                    {activity.description && (
-                      <div className="mt-2 text-sm text-gray-600">{activity.description}</div>
-                    )}
-                  </div>
-                ))}
-
-              {/* Empty State */}
-              {filteredActivities.length === 0 && (
-                <div className="py-12 text-center text-gray-500">
-                  {searchTerm || Object.values(selectedFilters).some((v) => v.length > 0) ? (
-                    <div>
-                      <p className="text-lg">No activities match your search or filters</p>
-                      <p className="mt-2 text-sm">
-                        Try adjusting your search term or removing some filters
-                      </p>
-                      <button
-                        onClick={() => setSelectedFilters({})}
-                        className="mt-3 rounded-md bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                      >
-                        Clear all filters
-                      </button>
-                    </div>
-                  ) : (
-                    <p className="text-lg">'No family activities available to add.'</p>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        <ActivitySelector
+          activities={filteredActivities.filter(
+            (activity) => !weekActivities.some((wa) => wa.activity_id === activity.id)
+          )}
+          weekActivities={weekActivities}
+          onAddActivity={addActivityToWeek}
+          onClose={() => {
+            setShowAddActivityModal(false);
+            setSearchTerm('');
+            setSelectedFilters({});
+          }}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
       )}
 
       {/* Empty State */}

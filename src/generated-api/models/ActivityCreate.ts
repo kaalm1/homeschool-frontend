@@ -21,6 +21,14 @@ export type ActivityCreate = {
    */
   description?: string | null;
   /**
+   * Primary activity type
+   */
+  primary_type?: ActivityType | null;
+  /**
+   * Primary theme response
+   */
+  primary_theme?: Theme | null;
+  /**
    * Activity costs
    */
   costs?: Array<Cost> | null;

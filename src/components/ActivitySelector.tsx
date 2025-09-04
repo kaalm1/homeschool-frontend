@@ -336,19 +336,6 @@ const ActivitySelector: React.FC<ActivitySelectorProps> = ({
             </div>
           )}
         </div>
-
-        {/* Footer */}
-        {/* <div className="rounded-b-2xl border-t border-gray-100 bg-gray-50 p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Users className="h-4 w-4" />
-              Perfect for family time
-            </div>
-            <button className="rounded-lg bg-blue-600 px-6 py-2 font-medium text-white transition-colors hover:bg-blue-700">
-              Browse All Activities
-            </button>
-          </div>
-        </div> */}
       </div>
     </div>
   );

@@ -45,6 +45,7 @@ export type { WeekSummary } from './models/WeekSummary';
 export { ActivitiesService } from './services/ActivitiesService';
 export { AuthenticationService } from './services/AuthenticationService';
 export { DefaultService } from './services/DefaultService';
+export { FamilyPreferencesService } from './services/FamilyPreferencesService';
 export { KidsService } from './services/KidsService';
 export { LlmService } from './services/LlmService';
 export { RewardsService } from './services/RewardsService';

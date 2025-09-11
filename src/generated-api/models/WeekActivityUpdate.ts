@@ -6,16 +6,17 @@
  * Update completion status and rating for a week activity.
  */
 export type WeekActivityUpdate = {
-  /**
-   * Whether the activity was completed
-   */
-  completed?: boolean | null;
-  /**
-   * Rating from 1-5 stars
-   */
-  rating?: number | null;
-  /**
-   * Optional notes about the experience
-   */
-  notes?: string | null;
+    /**
+     * Whether the activity was completed
+     */
+    completed?: (boolean | null);
+    /**
+     * Rating from 1-5 stars
+     */
+    rating?: (number | null);
+    /**
+     * Optional notes about the experience
+     */
+    notes?: (string | null);
 };
+

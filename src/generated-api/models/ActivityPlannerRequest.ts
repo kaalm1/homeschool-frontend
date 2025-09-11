@@ -2,10 +2,11 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-export type ActivityTaggingRequest = {
+export type ActivityPlannerRequest = {
+    data: string;
     /**
-     * Raw activities text to be tagged
+     * Date for the week (defaults to current date)
      */
-    activities: string;
+    current_date?: (string | null);
 };
 

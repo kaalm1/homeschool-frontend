@@ -3,9 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 export enum Frequency {
-  DAILY = 'daily',
-  WEEKLY = 'weekly',
-  MONTHLY = 'monthly',
-  ANNUALLY = 'annually',
-  SEASONAL = 'seasonal',
+    DAILY = 'daily',
+    MULTI_WEEK = 'multi_week',
+    WEEKLY = 'weekly',
+    BIWEEKLY = 'biweekly',
+    MONTHLY = 'monthly',
+    FEW_YEAR = 'few_year',
+    SEASONAL = 'seasonal',
+    ANNUALLY = 'annually',
 }

@@ -44,4 +44,5 @@ export { DefaultService } from './services/DefaultService';
 export { KidsService } from './services/KidsService';
 export { LlmService } from './services/LlmService';
 export { RewardsService } from './services/RewardsService';
+export { SettingsService } from './services/SettingsService';
 export { WeekActivitiesService } from './services/WeekActivitiesService';

@@ -480,7 +480,7 @@ export default function ActivitiesBrowser() {
               >
                 ← Back to Dashboard
               </button>
-              <h1 className="text-2xl font-bold text-gray-900">Activity Explorer</h1>
+              {/* <h1 className="text-2xl font-bold text-gray-900">Activity Explorer</h1> */}
             </div>
             <div className="flex items-center space-x-3">
               <button

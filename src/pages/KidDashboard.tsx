@@ -49,6 +49,12 @@ export default function KidDashboard() {
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Hi {kidName}!</h1>
         <Link
+          to="/settings"
+          className="rounded-full bg-purple-100 px-3 py-1 text-sm font-semibold text-purple-700 transition hover:bg-purple-200"
+        >
+          Settings
+        </Link>
+        <Link
           to="/parent"
           className="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700 transition hover:bg-blue-200"
         >

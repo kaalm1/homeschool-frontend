@@ -8,7 +8,6 @@ import type { PreferenceOptionsResponse } from './PreferenceOptionsResponse';
  * Response model for all settings options.
  */
 export type AllSettingsResponse = {
-    filters: FilterOptionsResponse;
-    preferences: PreferenceOptionsResponse;
+  filters: FilterOptionsResponse;
+  preferences: PreferenceOptionsResponse;
 };
-

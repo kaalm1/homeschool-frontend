@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useEffect, useState, useMemo } from 'react';
 import {
   User,
   Calendar,
@@ -13,102 +13,221 @@ import {
   Plus,
   X,
   Loader2,
+  Edit,
+  Trash2,
+  Check,
+  Home,
 } from 'lucide-react';
-import { SettingsService } from '@/generated-api';
-import type { AllSettingsResponse, EnumOption } from '@/generated-api';
-
-// Mock data structure based on your models
-interface Kid {
-  id: number;
-  name: string;
-  dob: string;
-  age?: number;
-  interests: string[];
-  special_needs: string[];
-  color: string;
-}
+import {
+  SettingsService,
+  FamilyPreferencesService,
+  KidsService,
+  UsersService,
+} from '@/generated-api';
+import type {
+  AllSettingsResponse,
+  EnumOption,
+  FamilyPreferenceResponse,
+  FamilyPreferenceUpdateRequest,
+  KidResponse,
+  KidCreate,
+  KidUpdate,
+  UserUpdate,
+  Theme,
+  ActivityType,
+  PreferredTimeSlot,
+  DaysOfWeek,
+  GroupActivityComfort,
+  NewExperienceOpenness,
+} from '@/generated-api';
 
 interface FamilyPreferences {
-  preferred_themes: string[];
-  preferred_activity_types: string[];
-  available_days: string[];
-  preferred_time_slots: string[];
-  group_activity_comfort: string;
-  new_experience_openness: string;
+  preferred_themes: Theme[];
+  preferred_activity_types: ActivityType[];
+  available_days: DaysOfWeek[];
+  preferred_time_slots: PreferredTimeSlot[];
+  group_activity_comfort: GroupActivityComfort | undefined;
+  new_experience_openness: NewExperienceOpenness | undefined;
   educational_priorities: string[];
 }
 
-export default function FamilySettings() {
-  const [kids, setKids] = useState<Kid[]>([
-    {
-      id: 1,
-      name: 'Emma',
-      dob: '2018-05-15',
-      age: 6,
-      interests: ['art', 'music'],
-      special_needs: [],
-      color: '#a7f3d0',
-    },
-    {
-      id: 2,
-      name: 'Alex',
-      dob: '2020-08-22',
-      age: 4,
-      interests: ['sports', 'building'],
-      special_needs: [],
-      color: '#fbbf24',
-    },
-  ]);
+interface FamilyProfile {
+  location?: string;
+  family_size?: number;
+}
 
+export default function FamilySettings() {
+  const [kids, setKids] = useState<KidResponse[]>([]);
   const [preferences, setPreferences] = useState<FamilyPreferences>({
-    preferred_themes: ['outdoor-adventure', 'arts-crafts'],
-    preferred_activity_types: ['creative-artistic', 'physical-active'],
-    available_days: ['saturday', 'sunday'],
-    preferred_time_slots: ['morning', 'afternoon'],
-    group_activity_comfort: 'medium',
-    new_experience_openness: 'medium',
-    educational_priorities: ['creativity', 'physical-development'],
+    preferred_themes: [],
+    preferred_activity_types: [],
+    available_days: [],
+    preferred_time_slots: [],
+    group_activity_comfort: undefined,
+    new_experience_openness: undefined,
+    educational_priorities: [],
+  });
+
+  const [familyProfile, setFamilyProfile] = useState<UserUpdate>({
+    address: '',
+    family_size: 1,
   });
 
   const [activeTab, setActiveTab] = useState('kids');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // API response data
   const [settingsOptions, setSettingsOptions] = useState<AllSettingsResponse | null>(null);
 
-  // Fetch settings options on component mount
+  // Edit states
+  const [editingKid, setEditingKid] = useState<number | null>(null);
+  const [addingKid, setAddingKid] = useState(false);
+  const [newKid, setNewKid] = useState<KidCreate>({
+    name: '',
+    dob: '',
+    interests: [],
+    special_needs: [],
+    color: '#a7f3d0',
+  });
+
+  // Load data on component mount
   useEffect(() => {
-    const fetchSettingsOptions = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await SettingsService.getAllSettingsApiV1SettingsSettingsAllGet();
-        setSettingsOptions(response);
+
+        // Load settings options, preferences, and kids in parallel
+        const [settingsResponse, preferencesResponse, kidsResponse, usersResponse] =
+          await Promise.all([
+            SettingsService.getAllSettingsApiV1SettingsSettingsAllGet(),
+            FamilyPreferencesService.getFamilyPreferencesApiV1FamilyPreferencesApiV1FamilyPreferencesGet().catch(
+              () => null
+            ),
+            KidsService.getKidsApiV1KidsGet().catch(() => []),
+            UsersService.getUserProfileApiV1UserProfileGet().catch(() => null),
+          ]);
+        setSettingsOptions(settingsResponse);
+        setKids(kidsResponse);
+
+        if (preferencesResponse) {
+          setPreferences({
+            preferred_themes: preferencesResponse.preferred_themes || [],
+            preferred_activity_types: preferencesResponse.preferred_activity_types || [],
+            available_days: preferencesResponse.available_days || [],
+            preferred_time_slots: preferencesResponse.preferred_time_slots || [],
+            group_activity_comfort: preferencesResponse.group_activity_comfort || undefined,
+            new_experience_openness: preferencesResponse.new_experience_openness || undefined,
+            educational_priorities: preferencesResponse.educational_priorities || [],
+          });
+        }
+        if (usersResponse) {
+          setFamilyProfile({
+            address: usersResponse.address || '',
+            family_size: usersResponse.family_size || 1,
+          });
+        }
       } catch (err) {
-        console.error('Failed to fetch settings options:', err);
-        setError('Failed to load settings options. Please try again.');
+        console.error('Failed to load data:', err);
+        setError('Failed to load settings. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSettingsOptions();
+    loadData();
   }, []);
+
+  const calculateAge = (dateOfBirth: string): number => {
+    const today = new Date();
+    const birthDate = new Date(dateOfBirth);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    return age;
+  };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      // TODO: Replace with actual API call to save preferences
-      // Example: await PreferencesService.updatePreferences(preferences);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const updateRequest: FamilyPreferenceUpdateRequest = {
+        ...preferences,
+      };
+      await FamilyPreferencesService.updateFamilyPreferencesApiV1FamilyPreferencesApiV1FamilyPreferencesPut(
+        {
+          requestBody: updateRequest,
+        }
+      );
+
+      const profileUpdate: UserUpdate = {
+        address: familyProfile.address,
+        family_size: familyProfile.family_size,
+      };
+      await UsersService.updateCurrentUserProfileApiV1UserProfilePatch({
+        requestBody: profileUpdate,
+      });
+
       // Show success message or redirect
+      alert('Settings saved successfully!');
     } catch (err) {
       console.error('Failed to save settings:', err);
-      // Handle error
+      alert('Failed to save settings. Please try again.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleCreateKid = async () => {
+    try {
+      const createdKid = await KidsService.createKidApiV1KidsPost({
+        requestBody: newKid,
+      });
+
+      setKids((prev) => [...prev, createdKid]);
+      setNewKid({
+        name: '',
+        dob: '',
+        interests: [],
+        special_needs: [],
+        color: '#a7f3d0',
+      });
+      setAddingKid(false);
+    } catch (err) {
+      console.error('Failed to create kid:', err);
+      alert('Failed to add kid. Please try again.');
+    }
+  };
+
+  const handleUpdateKid = async (kidId: number, updates: KidUpdate) => {
+    try {
+      const updatedKid = await KidsService.updateKidApiV1KidsKidIdPatch({
+        kidId,
+        requestBody: updates,
+      });
+
+      setKids((prev) => prev.map((kid) => (kid.id === kidId ? updatedKid : kid)));
+      setEditingKid(null);
+    } catch (err) {
+      console.error('Failed to update kid:', err);
+      alert('Failed to update kid. Please try again.');
+    }
+  };
+
+  const handleDeleteKid = async (kidId: number) => {
+    if (!confirm('Are you sure you want to delete this kid?')) return;
+
+    try {
+      await KidsService.deleteKidApiV1KidsKidIdDelete({ kidId });
+      setKids((prev) => prev.filter((kid) => kid.id !== kidId));
+    } catch (err) {
+      console.error('Failed to delete kid:', err);
+      alert('Failed to delete kid. Please try again.');
     }
   };
 
@@ -116,14 +235,25 @@ export default function FamilySettings() {
     setKids((prev) =>
       prev.map((kid) => {
         if (kid.id === kidId) {
+          const currentInterests = kid.interests ?? [];
           const interests = add
-            ? [...kid.interests, interest]
-            : kid.interests.filter((i) => i !== interest);
+            ? [...currentInterests, interest]
+            : currentInterests.filter((i) => i !== interest);
           return { ...kid, interests };
         }
         return kid;
       })
     );
+  };
+
+  const updateNewKidInterest = (interest: string, add: boolean) => {
+    setNewKid((prev) => {
+      const currentInterests = prev.interests ?? [];
+      const interests = add
+        ? [...currentInterests, interest]
+        : currentInterests.filter((i) => i !== interest);
+      return { ...prev, interests };
+    });
   };
 
   const updatePreferenceArray = (field: keyof FamilyPreferences, value: string, add: boolean) => {
@@ -225,6 +355,145 @@ export default function FamilySettings() {
     </div>
   );
 
+  const KidCard = ({ kid }: { kid: KidResponse }) => {
+    const isEditing = editingKid === kid.id;
+    const [editData, setEditData] = useState<KidUpdate>({
+      name: kid.name,
+      dob: kid.dob,
+      interests: kid.interests,
+      special_needs: kid.special_needs,
+      color: kid.color,
+    });
+
+    return (
+      <div className="rounded-lg border p-4" style={{ borderColor: kid.color }}>
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-full font-semibold text-white"
+              style={{ backgroundColor: kid.color }}
+            >
+              {kid.name[0]?.toUpperCase()}
+            </div>
+            <div>
+              {isEditing ? (
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={editData.name}
+                    onChange={(e) => setEditData((prev) => ({ ...prev, name: e.target.value }))}
+                    className="rounded border px-2 py-1 text-sm font-semibold"
+                  />
+                  <input
+                    type="date"
+                    value={editData.dob ?? ''}
+                    onChange={(e) => setEditData((prev) => ({ ...prev, dob: e.target.value }))}
+                    className="block rounded border px-2 py-1 text-sm"
+                  />
+                </div>
+              ) : (
+                <>
+                  <h3 className="font-semibold">{kid.name}</h3>
+                  {kid.dob && (
+                    <p className="text-sm text-gray-600">
+                      Age {kid.dob ? calculateAge(kid.dob) : 'N/A'} • Born{' '}
+                      {kid.dob ? new Date(kid.dob).toLocaleDateString() : 'Unknown'}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            {isEditing ? (
+              <>
+                <button
+                  onClick={() => handleUpdateKid(kid.id, editData)}
+                  className="rounded p-1 text-green-600 hover:bg-green-50"
+                >
+                  <Check className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => setEditingKid(null)}
+                  className="rounded p-1 text-gray-600 hover:bg-gray-50"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => setEditingKid(kid.id)}
+                  className="rounded p-1 text-blue-600 hover:bg-blue-50"
+                >
+                  <Edit className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => handleDeleteKid(kid.id)}
+                  className="rounded p-1 text-red-600 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <h4 className="mb-2 flex items-center gap-2 font-medium">
+            <Heart className="h-4 w-4" />
+            Interests
+          </h4>
+          <div className="mb-3 flex flex-wrap gap-2">
+            {(isEditing ? (editData?.interests ?? []) : (kid?.interests ?? [])).map((interest) => (
+              <span
+                key={interest}
+                className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800"
+              >
+                {interest}
+                <button
+                  onClick={() => {
+                    if (isEditing) {
+                      setEditData((prev) => ({
+                        ...prev,
+                        interests: prev.interests?.filter((i) => i !== interest) ?? [],
+                      }));
+                    } else {
+                      updateKidInterest(kid.id, interest, false);
+                    }
+                  }}
+                  className="hover:text-blue-600"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+          </div>
+
+          <input
+            type="text"
+            placeholder="Add new interest and press Enter"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                const interest = e.currentTarget.value.trim();
+                if (isEditing) {
+                  setEditData((prev) => ({
+                    ...prev,
+                    interests: [...(prev.interests ?? []), interest],
+                  }));
+                } else {
+                  updateKidInterest(kid.id, interest, true);
+                }
+                e.currentTarget.value = '';
+              }
+            }}
+          />
+        </div>
+      </div>
+    );
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -245,7 +514,7 @@ export default function FamilySettings() {
         <div className="flex min-h-[400px] items-center justify-center">
           <div className="flex items-center gap-3 text-gray-600">
             <Loader2 className="h-6 w-6 animate-spin" />
-            <span>Loading settings options...</span>
+            <span>Loading settings...</span>
           </div>
         </div>
       </div>
@@ -271,7 +540,7 @@ export default function FamilySettings() {
         </header>
         <div className="flex min-h-[400px] items-center justify-center">
           <div className="text-center">
-            <div className="text-red-600 mb-4">{error}</div>
+            <div className="mb-4 text-red-600">{error}</div>
             <button
               onClick={() => window.location.reload()}
               className="rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
@@ -320,6 +589,16 @@ export default function FamilySettings() {
         <div className="mb-8">
           <nav className="flex space-x-1 rounded-lg border bg-white p-1 shadow-sm">
             <button
+              onClick={() => setActiveTab('profile')}
+              className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === 'profile'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
+              } `}
+            >
+              Family Profile
+            </button>
+            <button
               onClick={() => setActiveTab('kids')}
               className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === 'kids'
@@ -352,6 +631,65 @@ export default function FamilySettings() {
           </nav>
         </div>
 
+        {/* Family Profile Tab */}
+        {activeTab === 'profile' && (
+          <div className="space-y-6">
+            <div className="rounded-lg border bg-white p-6 shadow-sm">
+              <div className="mb-6 flex items-center gap-2">
+                <Home className="h-5 w-5 text-blue-600" />
+                <h2 className="text-xl font-semibold">Family Profile</h2>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    <MapPin className="mr-2 inline h-4 w-4" />
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    value={familyProfile.address || ''}
+                    onChange={(e) =>
+                      setFamilyProfile((prev) => ({ ...prev, location: e.target.value }))
+                    }
+                    placeholder="Enter your city or zip code"
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                  />
+                  <p className="mt-1 text-sm text-gray-500">
+                    We'll use this to find activities near you
+                  </p>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    <Users className="mr-2 inline h-4 w-4" />
+                    Family Size
+                  </label>
+                  <select
+                    value={familyProfile.family_size || 1}
+                    onChange={(e) =>
+                      setFamilyProfile((prev) => ({
+                        ...prev,
+                        family_size: parseInt(e.target.value),
+                      }))
+                    }
+                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((size) => (
+                      <option key={size} value={size}>
+                        {size} {size === 1 ? 'person' : 'people'}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Total number of family members who might participate
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Kids Tab */}
         {activeTab === 'kids' && (
           <div className="space-y-6">
@@ -361,70 +699,100 @@ export default function FamilySettings() {
                   <User className="h-5 w-5 text-blue-600" />
                   <h2 className="text-xl font-semibold">Your Kids</h2>
                 </div>
-                <button className="flex items-center gap-2 font-medium text-blue-600 hover:text-blue-700">
+                <button
+                  onClick={() => setAddingKid(true)}
+                  className="flex items-center gap-2 font-medium text-blue-600 hover:text-blue-700"
+                >
                   <Plus className="h-4 w-4" />
                   Add Kid
                 </button>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-2">
-                {kids.map((kid) => (
-                  <div
-                    key={kid.id}
-                    className="rounded-lg border p-4"
-                    style={{ borderColor: kid.color }}
-                  >
-                    <div className="mb-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="flex h-10 w-10 items-center justify-center rounded-full font-semibold text-white"
-                          style={{ backgroundColor: kid.color }}
-                        >
-                          {kid.name[0]}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold">{kid.name}</h3>
-                          <p className="text-sm text-gray-600">Age {kid.age}</p>
-                        </div>
-                      </div>
-                    </div>
-
+              {/* Add New Kid Form */}
+              {addingKid && (
+                <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+                  <h3 className="mb-4 font-semibold">Add New Kid</h3>
+                  <div className="grid gap-4 md:grid-cols-2">
                     <div>
-                      <h4 className="mb-2 flex items-center gap-2 font-medium">
-                        <Heart className="h-4 w-4" />
-                        Interests
-                      </h4>
-                      <div className="mb-3 flex flex-wrap gap-2">
-                        {kid.interests.map((interest) => (
+                      <label className="mb-1 block text-sm font-medium">Name</label>
+                      <input
+                        type="text"
+                        value={newKid.name}
+                        onChange={(e) => setNewKid((prev) => ({ ...prev, name: e.target.value }))}
+                        className="w-full rounded-md border px-3 py-2"
+                        placeholder="Enter kid's name"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-sm font-medium">Date of Birth</label>
+                      <input
+                        type="date"
+                        value={newKid.dob ?? ''}
+                        onChange={(e) => setNewKid((prev) => ({ ...prev, dob: e.target.value }))}
+                        className="w-full rounded-md border px-3 py-2"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <label className="mb-2 block text-sm font-medium">Interests</label>
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      {newKid.interests &&
+                        newKid.interests.map((interest) => (
                           <span
                             key={interest}
                             className="flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800"
                           >
                             {interest}
                             <button
-                              onClick={() => updateKidInterest(kid.id, interest, false)}
+                              onClick={() => updateNewKidInterest(interest, false)}
                               className="hover:text-blue-600"
                             >
                               <X className="h-3 w-3" />
                             </button>
                           </span>
                         ))}
-                      </div>
-
-                      <input
-                        type="text"
-                        placeholder="Add new interest and press Enter"
-                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                            updateKidInterest(kid.id, e.currentTarget.value.trim(), true);
-                            e.currentTarget.value = '';
-                          }
-                        }}
-                      />
                     </div>
+                    <input
+                      type="text"
+                      placeholder="Add interest and press Enter"
+                      className="w-full rounded-md border px-3 py-2 text-sm"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                          updateNewKidInterest(e.currentTarget.value.trim(), true);
+                          e.currentTarget.value = '';
+                        }
+                      }}
+                    />
                   </div>
+
+                  <div className="mt-4 flex gap-2">
+                    <button
+                      onClick={handleCreateKid}
+                      disabled={!newKid.name || !newKid.dob}
+                      className="rounded-lg bg-blue-600 px-4 py-2 text-white disabled:bg-gray-400"
+                    >
+                      Add Kid
+                    </button>
+                    <button
+                      onClick={() => setAddingKid(false)}
+                      className="rounded-lg border px-4 py-2 text-gray-600 hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid gap-6 md:grid-cols-2">
+                {kids.map((kid) => (
+                  <KidCard key={kid.id} kid={kid} />
                 ))}
+                {kids.length === 0 && !addingKid && (
+                  <div className="col-span-2 py-8 text-center text-gray-500">
+                    No kids added yet. Click "Add Kid" to get started!
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -484,7 +852,7 @@ export default function FamilySettings() {
             <RadioCard
               title="Group Activity Comfort Level"
               options={settingsOptions.preferences.group_activity_comfort}
-              selected={preferences.group_activity_comfort}
+              selected={preferences.group_activity_comfort ?? ''}
               field="group_activity_comfort"
               icon={Users}
             />
@@ -492,7 +860,7 @@ export default function FamilySettings() {
             <RadioCard
               title="Openness to New Experiences"
               options={settingsOptions.preferences.new_experience_openness}
-              selected={preferences.new_experience_openness}
+              selected={preferences.new_experience_openness ?? ''}
               field="new_experience_openness"
               icon={Star}
             />

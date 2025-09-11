@@ -3,23 +3,17 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * User response model.
+ * User update model.
  */
-export type UserResponse = {
-  created_at: string;
-  updated_at: string;
+export type UserUpdate = {
   /**
    * User email address
    */
-  email: string;
-  /**
-   * User ID
-   */
-  id: number;
+  email?: string | null;
   /**
    * User active status
    */
-  is_active: boolean;
+  is_active?: boolean | null;
   /**
    * User location address
    */

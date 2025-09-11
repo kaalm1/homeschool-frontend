@@ -81,40 +81,4 @@ export class SettingsService {
             url: '/api/v1/settings/settings/all',
         });
     }
-    /**
-     * Get Preference Options
-     * Get all available preference options for family settings.
-     * @returns PreferenceOptionsResponse Successful Response
-     * @throws ApiError
-     */
-    public static getPreferenceOptionsApiV1FamilyPreferencesSettingsPreferencesGet(): CancelablePromise<PreferenceOptionsResponse> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/family-preferences/settings/preferences',
-        });
-    }
-    /**
-     * Get Filters Options
-     * Get all available filter options for activities.
-     * @returns FilterOptionsResponse Successful Response
-     * @throws ApiError
-     */
-    public static getFiltersOptionsApiV1FamilyPreferencesSettingsFiltersGet(): CancelablePromise<FilterOptionsResponse> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/family-preferences/settings/filters',
-        });
-    }
-    /**
-     * Get All Settings
-     * Get all settings options - both activity filters and user preferences.
-     * @returns AllSettingsResponse Successful Response
-     * @throws ApiError
-     */
-    public static getAllSettingsApiV1FamilyPreferencesSettingsAllGet(): CancelablePromise<AllSettingsResponse> {
-        return __request(OpenAPI, {
-            method: 'GET',
-            url: '/api/v1/family-preferences/settings/all',
-        });
-    }
 }

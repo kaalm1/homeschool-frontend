@@ -431,7 +431,7 @@ export default function ParentDashboard() {
       )}
 
       {/* Empty State */}
-      {kids.length === 0 && (
+      {/* {kids.length === 0 && (
         <div className="py-12 text-center">
           <p className="text-lg text-gray-500">No kids found. Add a kid to get started!</p>
           <Link
@@ -441,7 +441,7 @@ export default function ParentDashboard() {
             Add First Kid
           </Link>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

@@ -12,7 +12,10 @@ import {
   ArrowLeft,
   Plus,
   X,
+  Loader2,
 } from 'lucide-react';
+import { SettingsService } from '@/generated-api';
+import type { AllSettingsResponse, EnumOption } from '@/generated-api';
 
 // Mock data structure based on your models
 interface Kid {
@@ -34,41 +37,6 @@ interface FamilyPreferences {
   new_experience_openness: string;
   educational_priorities: string[];
 }
-
-const THEME_OPTIONS = [
-  'outdoor-adventure',
-  'arts-crafts',
-  'science-discovery',
-  'sports-fitness',
-  'cooking-baking',
-  'music-dance',
-  'reading-storytelling',
-  'building-making',
-];
-
-const ACTIVITY_TYPE_OPTIONS = [
-  'physical-active',
-  'creative-artistic',
-  'educational-learning',
-  'social-group',
-  'quiet-focused',
-  'messy-sensory',
-  'competitive-games',
-  'free-play',
-];
-
-const DAY_OPTIONS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-
-const TIME_SLOT_OPTIONS = ['early-morning', 'morning', 'afternoon', 'evening', 'weekend-flexible'];
-
-const EDUCATIONAL_PRIORITIES = [
-  'stem',
-  'arts',
-  'social-skills',
-  'physical-development',
-  'creativity',
-  'independence',
-];
 
 export default function FamilySettings() {
   const [kids, setKids] = useState<Kid[]>([
@@ -104,13 +72,44 @@ export default function FamilySettings() {
 
   const [activeTab, setActiveTab] = useState('kids');
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // API response data
+  const [settingsOptions, setSettingsOptions] = useState<AllSettingsResponse | null>(null);
+
+  // Fetch settings options on component mount
+  useEffect(() => {
+    const fetchSettingsOptions = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await SettingsService.getAllSettingsApiV1SettingsSettingsAllGet();
+        setSettingsOptions(response);
+      } catch (err) {
+        console.error('Failed to fetch settings options:', err);
+        setError('Failed to load settings options. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSettingsOptions();
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setSaving(false);
-    // Show success message or redirect
+    try {
+      // TODO: Replace with actual API call to save preferences
+      // Example: await PreferencesService.updatePreferences(preferences);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Show success message or redirect
+    } catch (err) {
+      console.error('Failed to save settings:', err);
+      // Handle error
+    } finally {
+      setSaving(false);
+    }
   };
 
   const updateKidInterest = (kidId: number, interest: string, add: boolean) => {
@@ -152,7 +151,7 @@ export default function FamilySettings() {
     maxSelect = undefined,
   }: {
     title: string;
-    options: { value: string; label: string; description?: string }[];
+    options: EnumOption[];
     selected: string[];
     field: keyof FamilyPreferences;
     icon: any;
@@ -183,9 +182,6 @@ export default function FamilySettings() {
               } `}
             >
               <div className="text-sm font-medium">{option.label}</div>
-              {option.description && (
-                <div className="mt-1 text-xs text-gray-600">{option.description}</div>
-              )}
             </button>
           );
         })}
@@ -201,7 +197,7 @@ export default function FamilySettings() {
     icon: Icon,
   }: {
     title: string;
-    options: { value: string; label: string; description?: string }[];
+    options: EnumOption[];
     selected: string;
     field: keyof FamilyPreferences;
     icon: any;
@@ -223,14 +219,74 @@ export default function FamilySettings() {
             } `}
           >
             <div className="text-sm font-medium">{option.label}</div>
-            {option.description && (
-              <div className="mt-1 text-xs text-gray-600">{option.description}</div>
-            )}
           </button>
         ))}
       </div>
     </div>
   );
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <header className="border-b bg-white shadow-sm">
+          <div className="mx-auto max-w-6xl px-4 py-4">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => window.history.back()}
+                className="rounded-md p-1 text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <h1 className="text-2xl font-bold">Family Settings</h1>
+            </div>
+          </div>
+        </header>
+        <div className="flex min-h-[400px] items-center justify-center">
+          <div className="flex items-center gap-3 text-gray-600">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <span>Loading settings options...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <header className="border-b bg-white shadow-sm">
+          <div className="mx-auto max-w-6xl px-4 py-4">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => window.history.back()}
+                className="rounded-md p-1 text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-700"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+              <h1 className="text-2xl font-bold">Family Settings</h1>
+            </div>
+          </div>
+        </header>
+        <div className="flex min-h-[400px] items-center justify-center">
+          <div className="text-center">
+            <div className="text-red-600 mb-4">{error}</div>
+            <button
+              onClick={() => window.location.reload()}
+              className="rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!settingsOptions) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -379,10 +435,7 @@ export default function FamilySettings() {
           <div className="space-y-6">
             <MultiSelectCard
               title="Preferred Themes"
-              options={THEME_OPTIONS.map((theme) => ({
-                value: theme,
-                label: theme.charAt(0).toUpperCase() + theme.slice(1),
-              }))}
+              options={settingsOptions.filters.themes}
               selected={preferences.preferred_themes}
               field="preferred_themes"
               icon={Star}
@@ -391,10 +444,7 @@ export default function FamilySettings() {
 
             <MultiSelectCard
               title="Preferred Activity Types"
-              options={ACTIVITY_TYPE_OPTIONS.map((activity) => ({
-                value: activity,
-                label: activity.charAt(0).toUpperCase() + activity.slice(1),
-              }))}
+              options={settingsOptions.filters.activity_types}
               selected={preferences.preferred_activity_types}
               field="preferred_activity_types"
               icon={Heart}
@@ -403,38 +453,7 @@ export default function FamilySettings() {
 
             <MultiSelectCard
               title="Learning Priorities"
-              options={[
-                {
-                  value: 'stem',
-                  label: '🔬 STEM',
-                  description: 'Science, technology, engineering, math',
-                },
-                {
-                  value: 'arts',
-                  label: '🎨 Arts',
-                  description: 'Creative expression and artistic skills',
-                },
-                {
-                  value: 'social-skills',
-                  label: '🤝 Social Skills',
-                  description: 'Communication and teamwork',
-                },
-                {
-                  value: 'physical-development',
-                  label: '🏃 Physical',
-                  description: 'Motor skills and fitness',
-                },
-                {
-                  value: 'creativity',
-                  label: '💡 Creativity',
-                  description: 'Innovation and imagination',
-                },
-                {
-                  value: 'independence',
-                  label: '🎯 Independence',
-                  description: 'Self-reliance and confidence',
-                },
-              ]}
+              options={settingsOptions.preferences.learning_priorities}
               selected={preferences.educational_priorities}
               field="educational_priorities"
               icon={Star}
@@ -448,10 +467,7 @@ export default function FamilySettings() {
           <div className="space-y-6">
             <MultiSelectCard
               title="Available Days"
-              options={DAY_OPTIONS.map((day) => ({
-                value: day,
-                label: day.charAt(0).toUpperCase() + day.slice(1),
-              }))}
+              options={settingsOptions.preferences.available_days}
               selected={preferences.available_days}
               field="available_days"
               icon={Calendar}
@@ -459,13 +475,7 @@ export default function FamilySettings() {
 
             <MultiSelectCard
               title="Preferred Time Slots"
-              options={TIME_SLOT_OPTIONS.map((slot) => ({
-                value: slot,
-                label: slot
-                  .split('-')
-                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                  .join(' '),
-              }))}
+              options={settingsOptions.preferences.preferred_time_slots}
               selected={preferences.preferred_time_slots}
               field="preferred_time_slots"
               icon={Clock}
@@ -473,23 +483,7 @@ export default function FamilySettings() {
 
             <RadioCard
               title="Group Activity Comfort Level"
-              options={[
-                {
-                  value: 'low',
-                  label: 'Small Groups',
-                  description: 'Prefer intimate, small group activities',
-                },
-                {
-                  value: 'medium',
-                  label: 'Medium Groups',
-                  description: 'Comfortable with moderate-sized groups',
-                },
-                {
-                  value: 'high',
-                  label: 'Large Groups',
-                  description: 'Enjoy big group activities and events',
-                },
-              ]}
+              options={settingsOptions.preferences.group_activity_comfort}
               selected={preferences.group_activity_comfort}
               field="group_activity_comfort"
               icon={Users}
@@ -497,23 +491,7 @@ export default function FamilySettings() {
 
             <RadioCard
               title="Openness to New Experiences"
-              options={[
-                {
-                  value: 'conservative',
-                  label: 'Stick to Favorites',
-                  description: 'Prefer familiar activities and routines',
-                },
-                {
-                  value: 'medium',
-                  label: 'Mix of Both',
-                  description: 'Balance of familiar and new experiences',
-                },
-                {
-                  value: 'adventurous',
-                  label: 'Love Trying New Things',
-                  description: 'Always excited for new adventures',
-                },
-              ]}
+              options={settingsOptions.preferences.new_experience_openness}
               selected={preferences.new_experience_openness}
               field="new_experience_openness"
               icon={Star}

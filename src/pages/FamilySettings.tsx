@@ -378,7 +378,7 @@ export default function FamilySettings() {
         {activeTab === 'preferences' && (
           <div className="space-y-6">
             <MultiSelectCard
-              title="Favorite Activity Themes"
+              title="Preferred Themes"
               options={THEME_OPTIONS.map((theme) => ({
                 value: theme,
                 label: theme.charAt(0).toUpperCase() + theme.slice(1),

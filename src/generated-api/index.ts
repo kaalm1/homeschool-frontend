@@ -25,6 +25,7 @@ export type { FamilyPreferenceResponse } from './models/FamilyPreferenceResponse
 export type { FamilyPreferenceUpdateRequest } from './models/FamilyPreferenceUpdateRequest';
 export type { FilterOptionsResponse } from './models/FilterOptionsResponse';
 export { Frequency } from './models/Frequency';
+export type { GoogleAuthRequest } from './models/GoogleAuthRequest';
 export { GroupActivityComfort } from './models/GroupActivityComfort';
 export type { HTTPValidationError } from './models/HTTPValidationError';
 export type { KidCreate } from './models/KidCreate';

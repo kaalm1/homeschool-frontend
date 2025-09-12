@@ -321,7 +321,9 @@ export default function ParentDashboard() {
                   {wa.activity_description && (
                     <p className="mt-1 text-sm text-gray-600">{wa.activity_description}</p>
                   )}
-                  {wa.notes && <p className="mt-2 text-sm text-gray-500 italic">"{wa.notes}"</p>}
+                  {wa.llm_notes && (
+                    <p className="mt-2 text-sm text-gray-500 italic">"{wa.llm_notes}"</p>
+                  )}
                 </div>
                 <div className="flex items-center space-x-2">
                   <button

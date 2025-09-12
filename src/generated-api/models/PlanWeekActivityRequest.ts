@@ -4,4 +4,8 @@
 /* eslint-disable */
 export type PlanWeekActivityRequest = {
   additional_notes?: string | null;
+  /**
+   * Start date of the week to plan (defaults to current week Monday)
+   */
+  target_week_start?: string | null;
 };

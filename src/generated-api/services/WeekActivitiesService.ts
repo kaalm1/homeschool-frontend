@@ -20,20 +20,12 @@ export class WeekActivitiesService {
    */
   public static planWeekActivitiesApiV1WeekActivitiesWeekActivitiesPlanWeekPost({
     requestBody,
-    targetWeekStart,
   }: {
     requestBody: PlanWeekActivityRequest;
-    /**
-     * Start date of the week to plan (defaults to current week)
-     */
-    targetWeekStart?: string | null;
   }): CancelablePromise<Array<WeekActivityResponse>> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/api/v1/week-activities/week-activities/plan-week',
-      query: {
-        target_week_start: targetWeekStart,
-      },
       body: requestBody,
       mediaType: 'application/json',
       errors: {

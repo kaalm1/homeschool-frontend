@@ -341,7 +341,9 @@ export default function FamilySettings() {
         {options.map((option) => (
           <button
             key={option.value}
-            onClick={() => updatePreferenceValue(field, selected === option.value ? '' : option.value)}
+            onClick={() =>
+              updatePreferenceValue(field, selected === option.value ? '' : option.value)
+            }
             className={`w-full rounded-lg border p-3 text-left transition-all ${
               selected === option.value
                 ? 'border-blue-500 bg-blue-50 text-blue-900'

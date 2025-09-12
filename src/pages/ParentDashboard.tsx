@@ -6,10 +6,7 @@ import {
   type ActivityResponse,
   type WeekActivityResponse,
 } from '@/generated-api';
-import {
-  type SelectedFilters,
-  useActivityFiltering,
-} from '@/components/SearchAndFilter';
+import { type SelectedFilters, useActivityFiltering } from '@/components/SearchAndFilter';
 import { Star, CheckSquare, Square, Trash2 } from 'lucide-react';
 import ActivitySelector from '@/components/ActivitySelector';
 
@@ -64,7 +61,6 @@ export default function ParentDashboard() {
 
   async function fetchData() {
     try {
-
       // Fetch all activities (for adding to weeks)
       const a = await ActivitiesService.getActivitiesApiV1ActivitiesGet({ kidId: undefined });
       setAllActivities(a);
@@ -407,7 +403,6 @@ export default function ParentDashboard() {
           onSearchChange={setSearchTerm}
         />
       )}
-
     </div>
   );
 }

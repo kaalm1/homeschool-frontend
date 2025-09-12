@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import type { BulkWeekActivityCreate } from '../models/BulkWeekActivityCreate';
+import type { PlanWeekActivityRequest } from '../models/PlanWeekActivityRequest';
 import type { WeekActivityCreate } from '../models/WeekActivityCreate';
 import type { WeekActivityResponse } from '../models/WeekActivityResponse';
 import type { WeekActivityUpdate } from '../models/WeekActivityUpdate';
@@ -18,8 +19,10 @@ export class WeekActivitiesService {
    * @throws ApiError
    */
   public static planWeekActivitiesApiV1WeekActivitiesWeekActivitiesPlanWeekPost({
+    requestBody,
     targetWeekStart,
   }: {
+    requestBody: PlanWeekActivityRequest;
     /**
      * Start date of the week to plan (defaults to current week)
      */
@@ -31,6 +34,8 @@ export class WeekActivitiesService {
       query: {
         target_week_start: targetWeekStart,
       },
+      body: requestBody,
+      mediaType: 'application/json',
       errors: {
         422: `Validation Error`,
       },

@@ -34,6 +34,7 @@ export { Location } from './models/Location';
 export type { LoginRequest } from './models/LoginRequest';
 export { NewExperienceOpenness } from './models/NewExperienceOpenness';
 export { Participants } from './models/Participants';
+export type { PlanWeekActivityRequest } from './models/PlanWeekActivityRequest';
 export type { PreferenceOptionsResponse } from './models/PreferenceOptionsResponse';
 export { PreferredTimeSlot } from './models/PreferredTimeSlot';
 export type { RegisterRequest } from './models/RegisterRequest';

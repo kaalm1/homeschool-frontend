@@ -17,7 +17,7 @@ export default function Login() {
     setError(null);
     setLoading(false);
     setGoogleLoading(false);
-    
+
     // Clean up URL if we're on callback route
     if (window.location.pathname === '/auth/google/callback') {
       nav('/login', { replace: true });
@@ -42,25 +42,26 @@ export default function Login() {
         setGoogleLoading(true);
         try {
           const googleAuthRequest: GoogleAuthRequest = { code, state };
-          const res: TokenResponse = await AuthenticationService.googleCallbackApiV1AuthGoogleCallbackPost({
-            requestBody: googleAuthRequest
-          });
-          
+          const res: TokenResponse =
+            await AuthenticationService.googleCallbackApiV1AuthGoogleCallbackPost({
+              requestBody: googleAuthRequest,
+            });
+
           localStorage.setItem('token', res.access_token);
           nav('/parent');
         } catch (err: unknown) {
           console.error('Google OAuth callback error:', err);
-          
+
           let errorMessage = 'Google login failed';
           if (axios.isAxiosError(err)) {
             errorMessage = err.response?.data?.detail || errorMessage;
-            
+
             // Handle 401 specifically
             if (err.response?.status === 401) {
               errorMessage = 'Authentication failed. Please try again.';
             }
           }
-          
+
           setError(errorMessage);
           clearAuthState(); // Clear auth state on failure
         } finally {
@@ -85,17 +86,17 @@ export default function Login() {
       nav('/parent');
     } catch (err: unknown) {
       console.error('Email login error:', err);
-      
+
       let errorMessage = 'Login failed';
       if (axios.isAxiosError(err)) {
         errorMessage = err.response?.data?.detail || errorMessage;
-        
+
         // Handle 401 specifically
         if (err.response?.status === 401) {
           errorMessage = 'Invalid email or password';
         }
       }
-      
+
       setError(errorMessage);
       clearAuthState(); // Clear auth state on failure
     } finally {
@@ -110,18 +111,18 @@ export default function Login() {
     try {
       // Get Google OAuth URL from backend
       const response = await AuthenticationService.getGoogleAuthUrlApiV1AuthGoogleUrlGet();
-      
+
       // Redirect to Google OAuth
       window.location.href = response.auth_url;
     } catch (err: unknown) {
       console.error('Google OAuth init error:', err);
-      
+
       setGoogleLoading(false);
       let errorMessage = 'Failed to initialize Google login';
       if (axios.isAxiosError(err)) {
         errorMessage = err.response?.data?.detail || errorMessage;
       }
-      
+
       setError(errorMessage);
       clearAuthState(); // Clear auth state on failure
     }
@@ -131,14 +132,14 @@ export default function Login() {
   if (googleLoading && new URLSearchParams(window.location.search).get('code')) {
     return (
       <div className="grid min-h-screen place-items-center p-4">
-        <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-md text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+        <div className="w-full max-w-sm rounded-lg bg-white p-6 text-center shadow-md">
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500"></div>
           <p className="text-gray-600">Completing Google sign in...</p>
-          
+
           {/* Cancel button for stuck flows */}
           <button
             onClick={clearAuthState}
-            className="mt-4 text-sm text-gray-500 hover:text-gray-700 underline"
+            className="mt-4 text-sm text-gray-500 underline hover:text-gray-700"
           >
             Cancel and return to login
           </button>
@@ -150,8 +151,8 @@ export default function Login() {
   return (
     <div className="grid min-h-screen place-items-center p-4">
       <div className="w-full max-w-sm space-y-4 rounded-lg bg-white p-6 shadow-md">
-        <h1 className="text-2xl font-bold text-center">Homeschool Helper</h1>
-        <p className="text-sm text-slate-500 text-center">
+        <h1 className="text-center text-2xl font-bold">Homeschool Helper</h1>
+        <p className="text-center text-sm text-slate-500">
           Demo login is prefilled. Backend must be running.
         </p>
 
@@ -159,9 +160,9 @@ export default function Login() {
         <button
           onClick={handleGoogleLogin}
           disabled={googleLoading || loading}
-          className="w-full flex items-center justify-center gap-3 px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex w-full items-center justify-center gap-3 rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-700 shadow-sm transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <svg className="w-5 h-5" viewBox="0 0 24 24">
+          <svg className="h-5 w-5" viewBox="0 0 24 24">
             <path
               fill="#4285F4"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -188,7 +189,7 @@ export default function Login() {
             <div className="w-full border-t border-gray-300" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">Or continue with email</span>
+            <span className="bg-white px-2 text-gray-500">Or continue with email</span>
           </div>
         </div>
 
@@ -211,7 +212,7 @@ export default function Login() {
             disabled={loading || googleLoading}
           />
           {error && (
-            <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-md p-3">
+            <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-600">
               <div className="flex items-start justify-between">
                 <span>{error}</span>
                 <button
@@ -226,19 +227,22 @@ export default function Login() {
           )}
           <button
             type="submit"
-            className="w-full rounded-md bg-blue-500 py-2 font-semibold text-white hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full rounded-md bg-blue-500 py-2 font-semibold text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={loading || googleLoading}
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
-        
+
         {/* Debug info - remove in production */}
         {import.meta.env.NODE_ENV === 'development' && (
-          <div className="mt-4 p-2 bg-gray-100 text-xs text-gray-600 rounded">
+          <div className="mt-4 rounded bg-gray-100 p-2 text-xs text-gray-600">
             <div>Current URL: {window.location.href}</div>
             {new URLSearchParams(window.location.search).get('code') && (
-              <div>OAuth Code: {new URLSearchParams(window.location.search).get('code')?.substring(0, 20)}...</div>
+              <div>
+                OAuth Code:{' '}
+                {new URLSearchParams(window.location.search).get('code')?.substring(0, 20)}...
+              </div>
             )}
           </div>
         )}

@@ -219,15 +219,26 @@ export default function FamilySettings() {
   };
 
   const handleDeleteKid = async (kidId: number) => {
-    if (!confirm('Are you sure you want to delete this kid?')) return;
-
-    try {
-      await KidsService.deleteKidApiV1KidsKidIdDelete({ kidId });
-      setKids((prev) => prev.filter((kid) => kid.id !== kidId));
-    } catch (err) {
-      console.error('Failed to delete kid:', err);
-      toast.error('Failed to delete kid. Please try again.');
-    }
+    toast('Are you sure you want to delete this kid?', {
+      action: {
+        label: 'Delete',
+        onClick: async () => {
+          try {
+            await KidsService.deleteKidApiV1KidsKidIdDelete({ kidId });
+            setKids((prev) => prev.filter((kid) => kid.id !== kidId));
+            toast.success('Kid deleted successfully!');
+          } catch (err) {
+            console.error('Failed to delete kid:', err);
+            toast.error('Failed to delete kid. Please try again.');
+          }
+        },
+      },
+      cancel: {
+        label: 'Cancel',
+        onClick: () => {},
+      },
+      duration: 10000,
+    });
   };
 
   const updateKidInterest = (kidId: number, interest: string, add: boolean) => {
@@ -868,7 +879,22 @@ export default function FamilySettings() {
           </div>
         )}
       </div>
-      <Toaster position="bottom-right" richColors />
+      <Toaster
+        position="top-center"
+        richColors
+        expand={true}
+        toastOptions={{
+          style: {
+            padding: '16px',
+            fontSize: '14px',
+            minHeight: '60px',
+            borderRadius: '12px',
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+          },
+          className: 'font-medium',
+        }}
+      />
     </div>
   );
 }

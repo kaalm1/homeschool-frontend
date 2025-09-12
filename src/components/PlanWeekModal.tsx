@@ -27,14 +27,14 @@ export default function PlanWeekModal({
   // Derived state for form validation
   const isFormValid = location.trim().length > 0;
 
-  if (!isOpen) return null;
-
   // Load user profile to get default location
   useEffect(() => {
     if (isOpen) {
       loadUserProfile();
     }
   }, [isOpen]);
+
+  if (!isOpen) return null;
 
   const loadUserProfile = async () => {
     try {
@@ -194,7 +194,7 @@ export default function PlanWeekModal({
           {!location.trim() && (
             <div className="mt-1 flex items-center text-xs text-red-600">
               <AlertCircle className="mr-1 h-3 w-3" />
-              Location is required for weather-based activity suggestions
+              Location is required to accurately plan activities for your area
             </div>
           )}
         </div>
@@ -202,7 +202,7 @@ export default function PlanWeekModal({
         {/* Additional Notes */}
         <div className="mb-6">
           <label className="mb-2 block text-sm font-medium text-gray-700">
-            Any special considerations for this week?
+            Optional: Any special considerations for this week?
           </label>
           <textarea
             value={additionalNotes}
@@ -212,9 +212,6 @@ export default function PlanWeekModal({
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none"
             disabled={isPlanning}
           />
-          <p className="mt-1 text-xs text-gray-500">
-            Optional: Any specific things happening this week we should know about?
-          </p>
         </div>
 
         {/* Action Buttons */}

@@ -137,19 +137,16 @@ export default function PlanWeekModal({
         {/* Additional Notes */}
         <div className="mb-6">
           <label className="mb-2 block text-sm font-medium text-gray-700">
-            Tell us about your family's preferences
+            Optional: Any special considerations for this week?
           </label>
           <textarea
             value={additionalNotes}
             onChange={(e) => setAdditionalNotes(e.target.value)}
-            placeholder="e.g., outdoor activities, age 5-10, limited budget, rainy weather backup plans..."
+            placeholder="e.g., Max has a soccer game Sunday, we're trying to save money this month, grandparents visiting..."
             rows={3}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none"
             disabled={isPlanning}
           />
-          <p className="mt-1 text-xs text-gray-500">
-            Optional: Help us suggest activities that fit your family perfectly
-          </p>
         </div>
 
         {/* Action Buttons */}
@@ -184,7 +181,8 @@ export default function PlanWeekModal({
         <div className="mt-4 rounded-lg bg-purple-50 p-3">
           <p className="text-xs text-purple-700">
             💡 <strong>Smart suggestions:</strong> We'll recommend activities based on your family's
-            past preferences and current trends, then add them to your selected week.
+            preferences, current trends, and predicted weather conditions, then add them to your
+            selected week.
           </p>
         </div>
       </div>

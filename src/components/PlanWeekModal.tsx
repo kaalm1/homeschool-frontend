@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { WeekActivitiesService, type WeekActivityResponse } from '@/generated-api';
-import { Calendar, Sparkles, X, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { WeekActivitiesService, UsersService, type WeekActivityResponse } from '@/generated-api';
+import { Calendar, Sparkles, X, Loader2, MapPin, AlertCircle } from 'lucide-react';
 
 interface PlanWeekModalProps {
   isOpen: boolean;
@@ -20,9 +20,35 @@ export default function PlanWeekModal({
   const [selectedYear, setSelectedYear] = useState(currentYear);
   const [selectedWeek, setSelectedWeek] = useState(currentWeek);
   const [additionalNotes, setAdditionalNotes] = useState('');
+  const [location, setLocation] = useState('');
   const [isPlanning, setIsPlanning] = useState(false);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+
+  // Derived state for form validation
+  const isFormValid = location.trim().length > 0;
 
   if (!isOpen) return null;
+
+  // Load user profile to get default location
+  useEffect(() => {
+    if (isOpen) {
+      loadUserProfile();
+    }
+  }, [isOpen]);
+
+  const loadUserProfile = async () => {
+    try {
+      setIsLoadingProfile(true);
+      const userProfile = await UsersService.getUserProfileApiV1UserProfileGet();
+      if (userProfile?.address) {
+        setLocation(userProfile.address);
+      }
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
 
   // Generate week options (current week + next 8 weeks)
   const weekOptions = [];
@@ -57,6 +83,11 @@ export default function PlanWeekModal({
   };
 
   const handlePlanWeek = async () => {
+    // Validate location is provided
+    if (!location.trim()) {
+      return; // Don't proceed if location is empty
+    }
+
     try {
       setIsPlanning(true);
 
@@ -68,6 +99,7 @@ export default function PlanWeekModal({
             requestBody: {
               additional_notes: additionalNotes.trim() || null,
               target_week_start: weekStartDate,
+              location: location.trim(),
             },
           }
         );
@@ -124,7 +156,7 @@ export default function PlanWeekModal({
               setSelectedWeek(parseInt(week));
             }}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none"
-            disabled={isPlanning}
+            disabled={isPlanning || isLoadingProfile}
           >
             {weekOptions.map(({ year, week }) => (
               <option key={`${year}-${week}`} value={`${year}-${week}`}>
@@ -134,19 +166,55 @@ export default function PlanWeekModal({
           </select>
         </div>
 
+        {/* Location */}
+        <div className="mb-4">
+          <label className="mb-2 flex items-center text-sm font-medium text-gray-700">
+            <MapPin className="mr-2 h-4 w-4" />
+            Location <span className="text-red-500">*</span>
+          </label>
+          {isLoadingProfile ? (
+            <div className="flex items-center justify-center rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Loading your location...
+            </div>
+          ) : (
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Enter your city, state or address"
+              className={`w-full rounded-lg border px-3 py-2 text-sm focus:ring-1 focus:outline-none ${
+                location.trim()
+                  ? 'border-gray-300 focus:border-purple-500 focus:ring-purple-500'
+                  : 'border-red-300 focus:border-red-500 focus:ring-red-500'
+              }`}
+              disabled={isPlanning}
+            />
+          )}
+          {!location.trim() && (
+            <div className="mt-1 flex items-center text-xs text-red-600">
+              <AlertCircle className="mr-1 h-3 w-3" />
+              Location is required for weather-based activity suggestions
+            </div>
+          )}
+        </div>
+
         {/* Additional Notes */}
         <div className="mb-6">
           <label className="mb-2 block text-sm font-medium text-gray-700">
-            Optional: Any special considerations for this week?
+            Any special considerations for this week?
           </label>
           <textarea
             value={additionalNotes}
             onChange={(e) => setAdditionalNotes(e.target.value)}
-            placeholder="e.g., Max has a soccer game Sunday, we're trying to save money this month, grandparents visiting..."
+            placeholder="e.g., Johnny has a soccer game Saturday, we're trying to save money this month, grandparents visiting..."
             rows={3}
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-purple-500 focus:ring-1 focus:ring-purple-500 focus:outline-none"
             disabled={isPlanning}
           />
+          <p className="mt-1 text-xs text-gray-500">
+            Optional: Any specific things happening this week we should know about?
+          </p>
         </div>
 
         {/* Action Buttons */}
@@ -160,8 +228,8 @@ export default function PlanWeekModal({
           </button>
           <button
             onClick={handlePlanWeek}
-            disabled={isPlanning}
-            className="flex flex-1 items-center justify-center rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
+            disabled={isPlanning || !isFormValid || isLoadingProfile}
+            className="flex flex-1 items-center justify-center rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPlanning ? (
               <>

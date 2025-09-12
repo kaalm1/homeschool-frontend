@@ -10,6 +10,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/auth/google/callback" element={<Login />} />
       <Route path="/parent" element={<ParentDashboard />} />
       <Route path="/kid/:kidId" element={<KidDashboard />} />
       <Route path="/activities" element={<ActivitiesBrowser />} />

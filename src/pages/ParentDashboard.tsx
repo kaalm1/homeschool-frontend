@@ -1,24 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  KidsService,
   ActivitiesService,
   WeekActivitiesService,
-  type KidResponse,
   type ActivityResponse,
   type WeekActivityResponse,
-  type WeekSummary,
 } from '@/generated-api';
 import {
-  SearchBar,
-  FilterToggle,
-  FilterPanel,
-  ResultsSummary,
   type SelectedFilters,
   useActivityFiltering,
-  extractFiltersFromActivities,
 } from '@/components/SearchAndFilter';
-import { Star, StarOff, CheckSquare, Square, Trash2 } from 'lucide-react';
+import { Star, CheckSquare, Square, Trash2 } from 'lucide-react';
 import ActivitySelector from '@/components/ActivitySelector';
 
 export enum WeekStatus {
@@ -51,16 +43,13 @@ export function getWeekStatus(year: number, week: number): WeekStatus {
 }
 
 export default function ParentDashboard() {
-  const [kids, setKids] = useState<KidResponse[]>([]);
   const [allActivities, setAllActivities] = useState<ActivityResponse[]>([]);
   const [weekActivities, setWeekActivities] = useState<WeekActivityResponse[]>([]);
-  const [weekSummary, setWeekSummary] = useState<WeekSummary | null>(null);
   const [availableWeeks, setAvailableWeeks] = useState<Array<Record<string, any>>>([]);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedWeek, setSelectedWeek] = useState<number>(getISOWeek(new Date()));
   const [showAddActivityModal, setShowAddActivityModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({});
 
   const availableActivities = allActivities.filter((activity) => {
@@ -75,9 +64,6 @@ export default function ParentDashboard() {
 
   async function fetchData() {
     try {
-      // Fetch kids
-      const k = await KidsService.getKidsApiV1KidsGet();
-      setKids(k);
 
       // Fetch all activities (for adding to weeks)
       const a = await ActivitiesService.getActivitiesApiV1ActivitiesGet({ kidId: undefined });
@@ -91,14 +77,6 @@ export default function ParentDashboard() {
           completedOnly: undefined,
         });
       setWeekActivities(weekActs);
-
-      // Fetch week summary
-      const summary =
-        await WeekActivitiesService.getWeekSummaryApiV1WeekActivitiesWeekActivitiesSummaryGet({
-          year: selectedYear,
-          week: selectedWeek,
-        });
-      setWeekSummary(summary);
 
       // Fetch available weeks
       const weeks =
@@ -430,18 +408,6 @@ export default function ParentDashboard() {
         />
       )}
 
-      {/* Empty State */}
-      {/* {kids.length === 0 && (
-        <div className="py-12 text-center">
-          <p className="text-lg text-gray-500">No kids found. Add a kid to get started!</p>
-          <Link
-            to="/add-kid"
-            className="mt-4 inline-block rounded-md bg-blue-500 px-6 py-2 text-white transition hover:bg-blue-600"
-          >
-            Add First Kid
-          </Link>
-        </div>
-      )} */}
     </div>
   );
 }

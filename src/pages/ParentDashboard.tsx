@@ -7,8 +7,9 @@ import {
   type WeekActivityResponse,
 } from '@/generated-api';
 import { type SelectedFilters, useActivityFiltering } from '@/components/SearchAndFilter';
-import { Star, CheckSquare, Square, Trash2 } from 'lucide-react';
+import { Star, CheckSquare, Sparkles, Square, Trash2 } from 'lucide-react';
 import ActivitySelector from '@/components/ActivitySelector';
+import PlanWeekModal from '@/components/PlanWeekModal';
 
 export enum WeekStatus {
   Past = 'past',
@@ -54,6 +55,16 @@ export default function ParentDashboard() {
   });
 
   const filteredActivities = useActivityFiltering(availableActivities, searchTerm, selectedFilters);
+
+  const [showPlanWeekModal, setShowPlanWeekModal] = useState(false);
+
+  async function handleWeekPlanned(plannedActivities: WeekActivityResponse[]) {
+    // Refresh the dashboard data to show the new activities
+    await fetchData();
+
+    // Optional: Show a success message or toast
+    console.log(`Successfully planned ${plannedActivities.length} activities!`);
+  }
 
   useEffect(() => {
     fetchData();
@@ -272,16 +283,26 @@ export default function ParentDashboard() {
       <div className="rounded-lg bg-white p-6 shadow-md">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-xl font-semibold">Family Activities</h3>
-          {weekStatus != WeekStatus.Past && (
+          <div className="flex space-x-3">
+            {/* Plan Week Button */}
             <button
-              onClick={() => {
-                setShowAddActivityModal(true);
-              }}
-              className="rounded-md bg-purple-500 px-4 py-2 text-white hover:bg-purple-600"
+              onClick={() => setShowPlanWeekModal(true)}
+              className="flex items-center rounded-md bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 text-white shadow-sm transition-all duration-200 hover:from-purple-600 hover:to-pink-600 hover:shadow-md"
             >
-              + Add Family Activity
+              <Sparkles className="mr-2 h-4 w-4" />
+              Plan Week
             </button>
-          )}
+
+            {/* Existing Add Activity Button */}
+            {weekStatus != WeekStatus.Past && (
+              <button
+                onClick={() => setShowAddActivityModal(true)}
+                className="rounded-md bg-purple-500 px-4 py-2 text-white hover:bg-purple-600"
+              >
+                + Add Family Activity
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="space-y-3">
@@ -385,6 +406,15 @@ export default function ParentDashboard() {
           )}
         </div>
       </div>
+
+      {/* Plan Week Modal */}
+      <PlanWeekModal
+        isOpen={showPlanWeekModal}
+        onClose={() => setShowPlanWeekModal(false)}
+        onWeekPlanned={handleWeekPlanned}
+        currentYear={selectedYear}
+        currentWeek={selectedWeek}
+      />
 
       {/* Add Activity Modal */}
       {showAddActivityModal && (

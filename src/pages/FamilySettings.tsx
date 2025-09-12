@@ -27,7 +27,6 @@ import {
 import type {
   AllSettingsResponse,
   EnumOption,
-  FamilyPreferenceResponse,
   FamilyPreferenceUpdateRequest,
   KidResponse,
   KidCreate,
@@ -40,6 +39,7 @@ import type {
   GroupActivityComfort,
   NewExperienceOpenness,
 } from '@/generated-api';
+import { Toaster, toast } from 'sonner';
 
 interface FamilyPreferences {
   preferred_themes: Theme[];
@@ -173,11 +173,10 @@ export default function FamilySettings() {
         requestBody: profileUpdate,
       });
 
-      // Show success message or redirect
-      alert('Settings saved successfully!');
+      toast.success('Settings saved successfully!');
     } catch (err) {
       console.error('Failed to save settings:', err);
-      alert('Failed to save settings. Please try again.');
+      toast.error('Failed to save settings. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -200,7 +199,7 @@ export default function FamilySettings() {
       setAddingKid(false);
     } catch (err) {
       console.error('Failed to create kid:', err);
-      alert('Failed to add kid. Please try again.');
+      toast.error('Failed to add kid. Please try again.');
     }
   };
 
@@ -215,7 +214,7 @@ export default function FamilySettings() {
       setEditingKid(null);
     } catch (err) {
       console.error('Failed to update kid:', err);
-      alert('Failed to update kid. Please try again.');
+      toast.error('Failed to update kid. Please try again.');
     }
   };
 
@@ -227,7 +226,7 @@ export default function FamilySettings() {
       setKids((prev) => prev.filter((kid) => kid.id !== kidId));
     } catch (err) {
       console.error('Failed to delete kid:', err);
-      alert('Failed to delete kid. Please try again.');
+      toast.error('Failed to delete kid. Please try again.');
     }
   };
 
@@ -652,7 +651,7 @@ export default function FamilySettings() {
                     type="text"
                     value={familyProfile.address || ''}
                     onChange={(e) =>
-                      setFamilyProfile((prev) => ({ ...prev, location: e.target.value }))
+                      setFamilyProfile((prev) => ({ ...prev, address: e.target.value }))
                     }
                     placeholder="Enter your city or zip code"
                     className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
@@ -869,6 +868,7 @@ export default function FamilySettings() {
           </div>
         )}
       </div>
+      <Toaster position="bottom-right" richColors />
     </div>
   );
 }

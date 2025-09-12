@@ -233,19 +233,6 @@ export default function Login() {
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
-
-        {/* Debug info - remove in production */}
-        {import.meta.env.NODE_ENV === 'development' && (
-          <div className="mt-4 rounded bg-gray-100 p-2 text-xs text-gray-600">
-            <div>Current URL: {window.location.href}</div>
-            {new URLSearchParams(window.location.search).get('code') && (
-              <div>
-                OAuth Code:{' '}
-                {new URLSearchParams(window.location.search).get('code')?.substring(0, 20)}...
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );

@@ -285,13 +285,15 @@ export default function ParentDashboard() {
           <h3 className="text-xl font-semibold">Family Activities</h3>
           <div className="flex space-x-3">
             {/* Plan Week Button */}
-            <button
-              onClick={() => setShowPlanWeekModal(true)}
-              className="flex items-center rounded-md bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 text-white shadow-sm transition-all duration-200 hover:from-purple-600 hover:to-pink-600 hover:shadow-md"
-            >
-              <Sparkles className="mr-2 h-4 w-4" />
-              Plan Week
-            </button>
+            {weekStatus != WeekStatus.Past && (
+              <button
+                onClick={() => setShowPlanWeekModal(true)}
+                className="flex items-center rounded-md bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 text-white shadow-sm transition-all duration-200 hover:from-purple-600 hover:to-pink-600 hover:shadow-md"
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                Plan Week
+              </button>
+            )}
 
             {/* Existing Add Activity Button */}
             {weekStatus != WeekStatus.Past && (

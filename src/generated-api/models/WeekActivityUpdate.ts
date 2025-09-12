@@ -17,5 +17,9 @@ export type WeekActivityUpdate = {
   /**
    * Optional notes about the experience
    */
+  llm_notes?: string | null;
+  /**
+   * Optional notes about the experience
+   */
   notes?: string | null;
 };

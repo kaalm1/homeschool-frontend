@@ -22,4 +22,5 @@ export type WeekActivityCreate = {
    * Year of the activity
    */
   activity_year?: number | null;
+  llm_suggestion?: boolean | null;
 };

@@ -184,10 +184,11 @@ export default function FamilySettings() {
 
   const handleCreateKid = async () => {
     try {
+      console.log(newKid);
       const createdKid = await KidsService.createKidApiV1KidsPost({
         requestBody: newKid,
       });
-
+      console.log(createdKid);
       setKids((prev) => [...prev, createdKid]);
       setNewKid({
         name: '',

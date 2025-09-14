@@ -60,4 +60,16 @@ export type ActivityUpdate = {
    * ActivityType IDs
    */
   types?: Array<ActivityType> | null;
+  /**
+   * Activity equipment
+   */
+  equipment?: Array<string> | null;
+  /**
+   * Activity instructions
+   */
+  instructions?: Array<string> | null;
+  /**
+   * Activity adhd tips
+   */
+  adhd_tips?: Array<string> | null;
 };

@@ -309,4 +309,48 @@ export class ActivitiesService {
       },
     });
   }
+  /**
+   * Get Checklist
+   * Get activities for the current user. Optionally filter by kid.
+   * @returns ActivityResponse Successful Response
+   * @throws ApiError
+   */
+  public static getChecklistApiV1ActivitiesActivityIdChecklistGet({
+    activityId,
+  }: {
+    activityId: number;
+  }): CancelablePromise<ActivityResponse> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/v1/activities{activity_id}/checklist',
+      path: {
+        activity_id: activityId,
+      },
+      errors: {
+        422: `Validation Error`,
+      },
+    });
+  }
+  /**
+   * Get Checklist
+   * Get activities for the current user. Optionally filter by kid.
+   * @returns ActivityResponse Successful Response
+   * @throws ApiError
+   */
+  public static getChecklistApiV1ActivitiesActivityIdChecklistGet1({
+    activityId,
+  }: {
+    activityId: number;
+  }): CancelablePromise<ActivityResponse> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/v1/activities{activity_id}/checklist',
+      path: {
+        activity_id: activityId,
+      },
+      errors: {
+        422: `Validation Error`,
+      },
+    });
+  }
 }

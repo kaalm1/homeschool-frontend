@@ -18,5 +18,8 @@ export type WeekActivityResponse = {
   llm_notes: string | null;
   activity_title?: string | null;
   activity_description?: string | null;
+  activity_equipment?: Array<string> | null;
+  activity_instructions?: Array<string> | null;
+  activity_adhd_tips?: Array<string> | null;
   user_name?: string | null;
 };

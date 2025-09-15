@@ -94,7 +94,7 @@ export default function PlanWeekModal({
       const weekStartDate = getWeekStartDate(selectedYear, selectedWeek);
 
       const plannedActivities =
-        await WeekActivitiesService.planWeekActivitiesApiV1WeekActivitiesWeekActivitiesPlanWeekPost(
+        await WeekActivitiesService.planWeekActivitiesApiV1WeekActivitiesPlanWeekPost(
           {
             requestBody: {
               additional_notes: additionalNotes.trim() || null,

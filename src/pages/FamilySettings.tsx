@@ -40,6 +40,7 @@ import type {
   NewExperienceOpenness,
 } from '@/generated-api';
 import { Toaster, toast } from 'sonner';
+import LocationInput from '@/components/LocationInput';
 
 interface FamilyPreferences {
   preferred_themes: Theme[];
@@ -654,24 +655,7 @@ export default function FamilySettings() {
               </div>
 
               <div className="grid gap-6 md:grid-cols-2">
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    <MapPin className="mr-2 inline h-4 w-4" />
-                    Location
-                  </label>
-                  <input
-                    type="text"
-                    value={familyProfile.address || ''}
-                    onChange={(e) =>
-                      setFamilyProfile((prev) => ({ ...prev, address: e.target.value }))
-                    }
-                    placeholder="Enter your city or zip code"
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                  />
-                  <p className="mt-1 text-sm text-gray-500">
-                    We'll use this to find activities near you
-                  </p>
-                </div>
+                <LocationInput familyProfile={familyProfile} setFamilyProfile={setFamilyProfile} />
 
                 <div>
                   <label className="mb-2 block text-sm font-medium text-gray-700">

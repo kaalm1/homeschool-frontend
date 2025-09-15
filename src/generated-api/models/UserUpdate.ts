@@ -22,4 +22,12 @@ export type UserUpdate = {
    * User family size
    */
   family_size?: number | null;
+  /**
+   * User latitude
+   */
+  latitude?: number | null;
+  /**
+   * User longitude
+   */
+  longitude?: number | null;
 };

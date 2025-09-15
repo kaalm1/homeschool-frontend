@@ -18,14 +18,14 @@ export class WeekActivitiesService {
    * @returns WeekActivityResponse Successful Response
    * @throws ApiError
    */
-  public static planWeekActivitiesApiV1WeekActivitiesWeekActivitiesPlanWeekPost({
+  public static planWeekActivitiesApiV1WeekActivitiesPlanWeekPost({
     requestBody,
   }: {
     requestBody: PlanWeekActivityRequest;
   }): CancelablePromise<Array<WeekActivityResponse>> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/v1/week-activities/week-activities/plan-week',
+      url: '/api/v1/week-activities/plan-week',
       body: requestBody,
       mediaType: 'application/json',
       errors: {
@@ -39,14 +39,14 @@ export class WeekActivitiesService {
    * @returns WeekActivityResponse Successful Response
    * @throws ApiError
    */
-  public static createWeekActivityApiV1WeekActivitiesWeekActivitiesPost({
+  public static createWeekActivityApiV1WeekActivitiesPost({
     requestBody,
   }: {
     requestBody: WeekActivityCreate;
   }): CancelablePromise<WeekActivityResponse> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/v1/week-activities/week-activities',
+      url: '/api/v1/week-activities/',
       body: requestBody,
       mediaType: 'application/json',
       errors: {
@@ -60,7 +60,7 @@ export class WeekActivitiesService {
    * @returns WeekActivityResponse Successful Response
    * @throws ApiError
    */
-  public static getWeekActivitiesApiV1WeekActivitiesWeekActivitiesGet({
+  public static getWeekActivitiesApiV1WeekActivitiesGet({
     year,
     week,
     completedOnly,
@@ -80,7 +80,7 @@ export class WeekActivitiesService {
   }): CancelablePromise<Array<WeekActivityResponse>> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/v1/week-activities/week-activities',
+      url: '/api/v1/week-activities/',
       query: {
         year: year,
         week: week,
@@ -97,7 +97,7 @@ export class WeekActivitiesService {
    * @returns WeekActivityResponse Successful Response
    * @throws ApiError
    */
-  public static updateWeekActivityApiV1WeekActivitiesWeekActivitiesWeekActivityIdPut({
+  public static updateWeekActivityApiV1WeekActivitiesWeekActivityIdPut({
     weekActivityId,
     requestBody,
   }: {
@@ -106,7 +106,7 @@ export class WeekActivitiesService {
   }): CancelablePromise<WeekActivityResponse> {
     return __request(OpenAPI, {
       method: 'PUT',
-      url: '/api/v1/week-activities/week-activities/{week_activity_id}',
+      url: '/api/v1/week-activities/{week_activity_id}',
       path: {
         week_activity_id: weekActivityId,
       },
@@ -118,41 +118,19 @@ export class WeekActivitiesService {
     });
   }
   /**
-   * Delete Week Activity
-   * Delete a week activity assignment by ID.
-   * @returns void
-   * @throws ApiError
-   */
-  public static deleteWeekActivityApiV1WeekActivitiesWeekActivitiesWeekActivityIdDelete({
-    weekActivityId,
-  }: {
-    weekActivityId: number;
-  }): CancelablePromise<void> {
-    return __request(OpenAPI, {
-      method: 'DELETE',
-      url: '/api/v1/week-activities/week-activities/{week_activity_id}',
-      path: {
-        week_activity_id: weekActivityId,
-      },
-      errors: {
-        422: `Validation Error`,
-      },
-    });
-  }
-  /**
    * Toggle Week Activity
    * Toggle the completion status of a week activity.
    * @returns WeekActivityResponse Successful Response
    * @throws ApiError
    */
-  public static toggleWeekActivityApiV1WeekActivitiesWeekActivitiesWeekActivityIdTogglePost({
+  public static toggleWeekActivityApiV1WeekActivitiesWeekActivityIdTogglePost({
     weekActivityId,
   }: {
     weekActivityId: number;
   }): CancelablePromise<WeekActivityResponse> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/v1/week-activities/week-activities/{week_activity_id}/toggle',
+      url: '/api/v1/week-activities/{week_activity_id}/toggle',
       path: {
         week_activity_id: weekActivityId,
       },
@@ -167,14 +145,14 @@ export class WeekActivitiesService {
    * @returns WeekActivityResponse Successful Response
    * @throws ApiError
    */
-  public static bulkCreateWeekActivitiesApiV1WeekActivitiesWeekActivitiesBulkPost({
+  public static bulkCreateWeekActivitiesApiV1WeekActivitiesBulkPost({
     requestBody,
   }: {
     requestBody: BulkWeekActivityCreate;
   }): CancelablePromise<Array<WeekActivityResponse>> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/v1/week-activities/week-activities/bulk',
+      url: '/api/v1/week-activities/bulk',
       body: requestBody,
       mediaType: 'application/json',
       errors: {
@@ -188,12 +166,12 @@ export class WeekActivitiesService {
    * @returns WeekActivityResponse Successful Response
    * @throws ApiError
    */
-  public static getCurrentWeekActivitiesApiV1WeekActivitiesWeekActivitiesCurrentGet(): CancelablePromise<
+  public static getCurrentWeekActivitiesApiV1WeekActivitiesCurrentGet(): CancelablePromise<
     Array<WeekActivityResponse>
   > {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/v1/week-activities/week-activities/current',
+      url: '/api/v1/week-activities/current',
     });
   }
   /**
@@ -202,7 +180,7 @@ export class WeekActivitiesService {
    * @returns WeekSummary Successful Response
    * @throws ApiError
    */
-  public static getWeekSummaryApiV1WeekActivitiesWeekActivitiesSummaryGet({
+  public static getWeekSummaryApiV1WeekActivitiesSummaryGet({
     year,
     week,
   }: {
@@ -217,7 +195,7 @@ export class WeekActivitiesService {
   }): CancelablePromise<WeekSummary> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/v1/week-activities/week-activities/summary',
+      url: '/api/v1/week-activities/summary',
       query: {
         year: year,
         week: week,
@@ -233,12 +211,34 @@ export class WeekActivitiesService {
    * @returns any Successful Response
    * @throws ApiError
    */
-  public static getAvailableWeeksApiV1WeekActivitiesWeekActivitiesWeeksGet(): CancelablePromise<
+  public static getAvailableWeeksApiV1WeekActivitiesWeeksGet(): CancelablePromise<
     Array<Record<string, any>>
   > {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/v1/week-activities/week-activities/weeks',
+      url: '/api/v1/week-activities/weeks',
+    });
+  }
+  /**
+   * Delete Week Activity
+   * Delete a week activity assignment by ID.
+   * @returns void
+   * @throws ApiError
+   */
+  public static deleteWeekActivityApiV1WeekActivitiesWeekActivityIdDelete({
+    weekActivityId,
+  }: {
+    weekActivityId: number;
+  }): CancelablePromise<void> {
+    return __request(OpenAPI, {
+      method: 'DELETE',
+      url: '/api/v1/week-activities{week_activity_id}',
+      path: {
+        week_activity_id: weekActivityId,
+      },
+      errors: {
+        422: `Validation Error`,
+      },
     });
   }
   /**
@@ -247,7 +247,7 @@ export class WeekActivitiesService {
    * @returns void
    * @throws ApiError
    */
-  public static removeActivityFromWeekApiV1WeekActivitiesWeekActivitiesRemoveDelete({
+  public static removeActivityFromWeekApiV1WeekActivitiesRemoveDelete({
     activityId,
     year,
     week,
@@ -267,7 +267,7 @@ export class WeekActivitiesService {
   }): CancelablePromise<void> {
     return __request(OpenAPI, {
       method: 'DELETE',
-      url: '/api/v1/week-activities/week-activities/remove',
+      url: '/api/v1/week-activities/remove',
       query: {
         activity_id: activityId,
         year: year,

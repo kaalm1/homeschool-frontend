@@ -127,6 +127,7 @@ export default function FamilySettings() {
         if (usersResponse) {
           setFamilyProfile({
             address: usersResponse.address || '',
+            zipcode: usersResponse.zipcode || '',
             family_size: usersResponse.family_size || 1,
           });
         }
@@ -155,6 +156,11 @@ export default function FamilySettings() {
   };
 
   const handleSave = async () => {
+    const fullZipRegex = /^\d{5}(-\d{4})?$/;
+    if (!familyProfile.zipcode || !fullZipRegex.test(familyProfile.zipcode)) {
+      toast.error('Please enter a valid ZIP code before saving.');
+      return;
+    }
     setSaving(true);
     try {
       const updateRequest: FamilyPreferenceUpdateRequest = {
@@ -168,6 +174,9 @@ export default function FamilySettings() {
 
       const profileUpdate: UserUpdate = {
         address: familyProfile.address,
+        zipcode: familyProfile.zipcode,
+        latitude: familyProfile.latitude,
+        longitude: familyProfile.longitude,
         family_size: familyProfile.family_size,
       };
       await UsersService.updateCurrentUserProfileApiV1UserProfilePatch({

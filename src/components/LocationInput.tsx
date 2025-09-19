@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { MapPin, Crosshair, Loader2 } from 'lucide-react';
+import type { UserUpdate } from '@/generated-api';
 
-interface UserUpdate {
-  email?: string | null;
-  is_active?: boolean | null;
-  address?: string | null;
-  family_size?: number | null;
-  latitude?: number | null;
-  longitude?: number | null;
-}
+// Regex for valid final zipcode (5 or 5+4 format)
+const fullZipRegex = /^\d{5}(-\d{4})?$/;
+
+// Regex for valid partial input (digits, optional dash, but not exceeding lengths)
+const partialZipRegex = /^\d{0,5}(-\d{0,4})?$/;
 
 interface LocationInputProps {
   familyProfile: UserUpdate;
@@ -71,7 +69,6 @@ const LocationInput: React.FC<LocationInputProps> = ({ familyProfile, setFamilyP
         `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
       );
       const data: any = await res.json();
-
       let locationString = '';
       if (data.city && data.principalSubdivision) {
         locationString = `${data.city}, ${data.principalSubdivision}`;
@@ -79,8 +76,6 @@ const LocationInput: React.FC<LocationInputProps> = ({ familyProfile, setFamilyP
         locationString = `${data.locality}, ${data.principalSubdivision}`;
       } else if (data.principalSubdivision) {
         locationString = data.principalSubdivision;
-      } else {
-        locationString = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
       }
 
       setFamilyProfile((prev) => ({
@@ -88,15 +83,16 @@ const LocationInput: React.FC<LocationInputProps> = ({ familyProfile, setFamilyP
         address: locationString,
         latitude: lat,
         longitude: lng,
+        city: data.city,
+        state: data.principalSubdivision,
+        zipcode: data.postcode,
       }));
 
       setIsGettingLocation(false);
     } catch (err) {
       // Fallback to coordinates if reverse geocoding fails
-      const coordString = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
       setFamilyProfile((prev) => ({
         ...prev,
-        address: coordString,
         latitude: lat,
         longitude: lng,
       }));
@@ -114,13 +110,19 @@ const LocationInput: React.FC<LocationInputProps> = ({ familyProfile, setFamilyP
       <div className="flex gap-2">
         <input
           type="text"
-          value={familyProfile.address || ''}
+          value={familyProfile.zipcode || ''}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            setLocationError(null);
-            setFamilyProfile((prev) => ({ ...prev, address: e.target.value }));
+            const value = e.target.value;
+
+            setFamilyProfile((prev) => ({ ...prev, zipcode: value }));
           }}
-          placeholder="Enter your city or zip code"
-          className="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+          placeholder="Enter your zipcode"
+          title="Please enter a valid ZIP code (e.g. 12345 or 12345-6789)"
+          className={`flex-1 rounded-md border px-3 py-2 focus:outline-none ${
+            !familyProfile.zipcode || partialZipRegex.test(familyProfile.zipcode)
+              ? 'border-gray-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+              : 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+          }`}
         />
 
         <button

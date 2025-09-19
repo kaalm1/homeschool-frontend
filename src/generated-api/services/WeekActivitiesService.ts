@@ -12,270 +12,266 @@ import type { CancelablePromise } from '../core/CancelablePromise';
 import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class WeekActivitiesService {
-  /**
-   * Plan Week Activities
-   * Plan activities for a week using AI recommendations and create week activity assignments.
-   * @returns WeekActivityResponse Successful Response
-   * @throws ApiError
-   */
-  public static planWeekActivitiesApiV1WeekActivitiesPlanWeekPost({
-    requestBody,
-  }: {
-    requestBody: PlanWeekActivityRequest;
-  }): CancelablePromise<Array<WeekActivityResponse>> {
-    return __request(OpenAPI, {
-      method: 'POST',
-      url: '/api/v1/week-activities/plan-week',
-      body: requestBody,
-      mediaType: 'application/json',
-      errors: {
-        422: `Validation Error`,
-      },
-    });
-  }
-  /**
-   * Create Week Activity
-   * Create a new week activity assignment.
-   * @returns WeekActivityResponse Successful Response
-   * @throws ApiError
-   */
-  public static createWeekActivityApiV1WeekActivitiesPost({
-    requestBody,
-  }: {
-    requestBody: WeekActivityCreate;
-  }): CancelablePromise<WeekActivityResponse> {
-    return __request(OpenAPI, {
-      method: 'POST',
-      url: '/api/v1/week-activities/',
-      body: requestBody,
-      mediaType: 'application/json',
-      errors: {
-        422: `Validation Error`,
-      },
-    });
-  }
-  /**
-   * Get Week Activities
-   * Get week activities with optional filters.
-   * @returns WeekActivityResponse Successful Response
-   * @throws ApiError
-   */
-  public static getWeekActivitiesApiV1WeekActivitiesGet({
-    year,
-    week,
-    completedOnly,
-  }: {
     /**
-     * Year to filter by
+     * Plan Week Activities
+     * Plan activities for a week using AI recommendations and create week activity assignments.
+     * @returns WeekActivityResponse Successful Response
+     * @throws ApiError
      */
-    year?: number | null;
+    public static planWeekActivitiesApiV1WeekActivitiesPlanWeekPost({
+        requestBody,
+    }: {
+        requestBody: PlanWeekActivityRequest,
+    }): CancelablePromise<Array<WeekActivityResponse>> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/week-activities/plan-week',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
     /**
-     * Week number to filter by (1-53)
+     * Create Week Activity
+     * Create a new week activity assignment.
+     * @returns WeekActivityResponse Successful Response
+     * @throws ApiError
      */
-    week?: number | null;
+    public static createWeekActivityApiV1WeekActivitiesPost({
+        requestBody,
+    }: {
+        requestBody: WeekActivityCreate,
+    }): CancelablePromise<WeekActivityResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/week-activities/',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
     /**
-     * Filter by completion status
+     * Get Week Activities
+     * Get week activities with optional filters.
+     * @returns WeekActivityResponse Successful Response
+     * @throws ApiError
      */
-    completedOnly?: boolean | null;
-  }): CancelablePromise<Array<WeekActivityResponse>> {
-    return __request(OpenAPI, {
-      method: 'GET',
-      url: '/api/v1/week-activities/',
-      query: {
-        year: year,
-        week: week,
-        completed_only: completedOnly,
-      },
-      errors: {
-        422: `Validation Error`,
-      },
-    });
-  }
-  /**
-   * Update Week Activity
-   * Update a week activity's completion status, rating, and notes.
-   * @returns WeekActivityResponse Successful Response
-   * @throws ApiError
-   */
-  public static updateWeekActivityApiV1WeekActivitiesWeekActivityIdPut({
-    weekActivityId,
-    requestBody,
-  }: {
-    weekActivityId: number;
-    requestBody: WeekActivityUpdate;
-  }): CancelablePromise<WeekActivityResponse> {
-    return __request(OpenAPI, {
-      method: 'PUT',
-      url: '/api/v1/week-activities/{week_activity_id}',
-      path: {
-        week_activity_id: weekActivityId,
-      },
-      body: requestBody,
-      mediaType: 'application/json',
-      errors: {
-        422: `Validation Error`,
-      },
-    });
-  }
-  /**
-   * Toggle Week Activity
-   * Toggle the completion status of a week activity.
-   * @returns WeekActivityResponse Successful Response
-   * @throws ApiError
-   */
-  public static toggleWeekActivityApiV1WeekActivitiesWeekActivityIdTogglePost({
-    weekActivityId,
-  }: {
-    weekActivityId: number;
-  }): CancelablePromise<WeekActivityResponse> {
-    return __request(OpenAPI, {
-      method: 'POST',
-      url: '/api/v1/week-activities/{week_activity_id}/toggle',
-      path: {
-        week_activity_id: weekActivityId,
-      },
-      errors: {
-        422: `Validation Error`,
-      },
-    });
-  }
-  /**
-   * Bulk Create Week Activities
-   * Create multiple week activity assignments at once.
-   * @returns WeekActivityResponse Successful Response
-   * @throws ApiError
-   */
-  public static bulkCreateWeekActivitiesApiV1WeekActivitiesBulkPost({
-    requestBody,
-  }: {
-    requestBody: BulkWeekActivityCreate;
-  }): CancelablePromise<Array<WeekActivityResponse>> {
-    return __request(OpenAPI, {
-      method: 'POST',
-      url: '/api/v1/week-activities/bulk',
-      body: requestBody,
-      mediaType: 'application/json',
-      errors: {
-        422: `Validation Error`,
-      },
-    });
-  }
-  /**
-   * Get Current Week Activities
-   * Get activities for the current week.
-   * @returns WeekActivityResponse Successful Response
-   * @throws ApiError
-   */
-  public static getCurrentWeekActivitiesApiV1WeekActivitiesCurrentGet(): CancelablePromise<
-    Array<WeekActivityResponse>
-  > {
-    return __request(OpenAPI, {
-      method: 'GET',
-      url: '/api/v1/week-activities/current',
-    });
-  }
-  /**
-   * Get Week Summary
-   * Get a summary of activities for a specific week with completion stats.
-   * @returns WeekSummary Successful Response
-   * @throws ApiError
-   */
-  public static getWeekSummaryApiV1WeekActivitiesSummaryGet({
-    year,
-    week,
-  }: {
+    public static getWeekActivitiesApiV1WeekActivitiesGet({
+        year,
+        week,
+        completedOnly,
+    }: {
+        /**
+         * Year to filter by
+         */
+        year?: (number | null),
+        /**
+         * Week number to filter by (1-53)
+         */
+        week?: (number | null),
+        /**
+         * Filter by completion status
+         */
+        completedOnly?: (boolean | null),
+    }): CancelablePromise<Array<WeekActivityResponse>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/week-activities/',
+            query: {
+                'year': year,
+                'week': week,
+                'completed_only': completedOnly,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
     /**
-     * Year (defaults to current year)
+     * Update Week Activity
+     * Update a week activity's completion status, rating, and notes.
+     * @returns WeekActivityResponse Successful Response
+     * @throws ApiError
      */
-    year?: number | null;
+    public static updateWeekActivityApiV1WeekActivitiesWeekActivityIdPut({
+        weekActivityId,
+        requestBody,
+    }: {
+        weekActivityId: number,
+        requestBody: WeekActivityUpdate,
+    }): CancelablePromise<WeekActivityResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/week-activities/{week_activity_id}',
+            path: {
+                'week_activity_id': weekActivityId,
+            },
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
     /**
-     * Week number (defaults to current week)
+     * Toggle Week Activity
+     * Toggle the completion status of a week activity.
+     * @returns WeekActivityResponse Successful Response
+     * @throws ApiError
      */
-    week?: number | null;
-  }): CancelablePromise<WeekSummary> {
-    return __request(OpenAPI, {
-      method: 'GET',
-      url: '/api/v1/week-activities/summary',
-      query: {
-        year: year,
-        week: week,
-      },
-      errors: {
-        422: `Validation Error`,
-      },
-    });
-  }
-  /**
-   * Get Available Weeks
-   * Get all weeks that have activities.
-   * @returns any Successful Response
-   * @throws ApiError
-   */
-  public static getAvailableWeeksApiV1WeekActivitiesWeeksGet(): CancelablePromise<
-    Array<Record<string, any>>
-  > {
-    return __request(OpenAPI, {
-      method: 'GET',
-      url: '/api/v1/week-activities/weeks',
-    });
-  }
-  /**
-   * Delete Week Activity
-   * Delete a week activity assignment by ID.
-   * @returns void
-   * @throws ApiError
-   */
-  public static deleteWeekActivityApiV1WeekActivitiesWeekActivityIdDelete({
-    weekActivityId,
-  }: {
-    weekActivityId: number;
-  }): CancelablePromise<void> {
-    return __request(OpenAPI, {
-      method: 'DELETE',
-      url: '/api/v1/week-activities{week_activity_id}',
-      path: {
-        week_activity_id: weekActivityId,
-      },
-      errors: {
-        422: `Validation Error`,
-      },
-    });
-  }
-  /**
-   * Remove Activity From Week
-   * Remove a specific activity from a user's week.
-   * @returns void
-   * @throws ApiError
-   */
-  public static removeActivityFromWeekApiV1WeekActivitiesRemoveDelete({
-    activityId,
-    year,
-    week,
-  }: {
+    public static toggleWeekActivityApiV1WeekActivitiesWeekActivityIdTogglePost({
+        weekActivityId,
+    }: {
+        weekActivityId: number,
+    }): CancelablePromise<WeekActivityResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/week-activities/{week_activity_id}/toggle',
+            path: {
+                'week_activity_id': weekActivityId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
     /**
-     * Activity ID
+     * Bulk Create Week Activities
+     * Create multiple week activity assignments at once.
+     * @returns WeekActivityResponse Successful Response
+     * @throws ApiError
      */
-    activityId: number;
+    public static bulkCreateWeekActivitiesApiV1WeekActivitiesBulkPost({
+        requestBody,
+    }: {
+        requestBody: BulkWeekActivityCreate,
+    }): CancelablePromise<Array<WeekActivityResponse>> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/week-activities/bulk',
+            body: requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
     /**
-     * Year (defaults to current year)
+     * Get Current Week Activities
+     * Get activities for the current week.
+     * @returns WeekActivityResponse Successful Response
+     * @throws ApiError
      */
-    year?: number | null;
+    public static getCurrentWeekActivitiesApiV1WeekActivitiesCurrentGet(): CancelablePromise<Array<WeekActivityResponse>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/week-activities/current',
+        });
+    }
     /**
-     * Week number (defaults to current week)
+     * Get Week Summary
+     * Get a summary of activities for a specific week with completion stats.
+     * @returns WeekSummary Successful Response
+     * @throws ApiError
      */
-    week?: number | null;
-  }): CancelablePromise<void> {
-    return __request(OpenAPI, {
-      method: 'DELETE',
-      url: '/api/v1/week-activities/remove',
-      query: {
-        activity_id: activityId,
-        year: year,
-        week: week,
-      },
-      errors: {
-        422: `Validation Error`,
-      },
-    });
-  }
+    public static getWeekSummaryApiV1WeekActivitiesSummaryGet({
+        year,
+        week,
+    }: {
+        /**
+         * Year (defaults to current year)
+         */
+        year?: (number | null),
+        /**
+         * Week number (defaults to current week)
+         */
+        week?: (number | null),
+    }): CancelablePromise<WeekSummary> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/week-activities/summary',
+            query: {
+                'year': year,
+                'week': week,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Get Available Weeks
+     * Get all weeks that have activities.
+     * @returns any Successful Response
+     * @throws ApiError
+     */
+    public static getAvailableWeeksApiV1WeekActivitiesWeeksGet(): CancelablePromise<Array<Record<string, any>>> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/week-activities/weeks',
+        });
+    }
+    /**
+     * Delete Week Activity
+     * Delete a week activity assignment by ID.
+     * @returns void
+     * @throws ApiError
+     */
+    public static deleteWeekActivityApiV1WeekActivitiesWeekActivityIdDelete({
+        weekActivityId,
+    }: {
+        weekActivityId: number,
+    }): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/week-activities{week_activity_id}',
+            path: {
+                'week_activity_id': weekActivityId,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
+    /**
+     * Remove Activity From Week
+     * Remove a specific activity from a user's week.
+     * @returns void
+     * @throws ApiError
+     */
+    public static removeActivityFromWeekApiV1WeekActivitiesRemoveDelete({
+        activityId,
+        year,
+        week,
+    }: {
+        /**
+         * Activity ID
+         */
+        activityId: number,
+        /**
+         * Year (defaults to current year)
+         */
+        year?: (number | null),
+        /**
+         * Week number (defaults to current week)
+         */
+        week?: (number | null),
+    }): CancelablePromise<void> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/week-activities/remove',
+            query: {
+                'activity_id': activityId,
+                'year': year,
+                'week': week,
+            },
+            errors: {
+                422: `Validation Error`,
+            },
+        });
+    }
 }

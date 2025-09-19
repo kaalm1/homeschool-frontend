@@ -15,6 +15,7 @@ import {
   type ActivityType,
   type ActivityScale,
 } from '@/generated-api';
+import Swal from 'sweetalert2';
 
 type TagCategory =
   | 'themes'
@@ -150,7 +151,19 @@ export default function ActivitiesBrowser() {
   };
 
   const deleteActivity = async (activityId: number) => {
-    if (!confirm('Are you sure you want to delete this activity?')) return;
+    const result = await Swal.fire({
+      title: 'Delete Activity?',
+      text: 'This action cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true, // Cancel on left, Delete on right
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       await ActivitiesService.deleteActivityApiV1ActivitiesActivityIdDelete({ activityId });

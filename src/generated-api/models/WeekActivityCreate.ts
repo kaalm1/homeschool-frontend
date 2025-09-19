@@ -1,7 +1,7 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
-/* eslint-disable */
+
 /**
  * Create a new week activity assignment.
  */
@@ -23,4 +23,5 @@ export type WeekActivityCreate = {
    */
   activity_year?: number | null;
   llm_suggestion?: boolean | null;
+  llm_notes?: string | null;
 };

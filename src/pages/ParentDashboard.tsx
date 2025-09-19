@@ -77,17 +77,15 @@ export default function ParentDashboard() {
       setAllActivities(a);
 
       // Fetch week activities for selected week
-      const weekActs =
-        await WeekActivitiesService.getWeekActivitiesApiV1WeekActivitiesGet({
-          year: selectedYear,
-          week: selectedWeek,
-          completedOnly: undefined,
-        });
+      const weekActs = await WeekActivitiesService.getWeekActivitiesApiV1WeekActivitiesGet({
+        year: selectedYear,
+        week: selectedWeek,
+        completedOnly: undefined,
+      });
       setWeekActivities(weekActs);
 
       // Fetch available weeks
-      const weeks =
-        await WeekActivitiesService.getAvailableWeeksApiV1WeekActivitiesWeeksGet();
+      const weeks = await WeekActivitiesService.getAvailableWeeksApiV1WeekActivitiesWeeksGet();
       setAvailableWeeks(weeks);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
@@ -97,11 +95,9 @@ export default function ParentDashboard() {
   async function toggleWeekActivity(weekActivityId: number) {
     try {
       const updatedWeekActivity =
-        await WeekActivitiesService.toggleWeekActivityApiV1WeekActivitiesWeekActivityIdTogglePost(
-          {
-            weekActivityId,
-          }
-        );
+        await WeekActivitiesService.toggleWeekActivityApiV1WeekActivitiesWeekActivityIdTogglePost({
+          weekActivityId,
+        });
 
       setWeekActivities((prev) =>
         prev.map((wa) => (wa.id === weekActivityId ? updatedWeekActivity : wa))
@@ -117,15 +113,13 @@ export default function ParentDashboard() {
   async function updateWeekActivityRating(weekActivityId: number, rating: number, notes?: string) {
     try {
       const updatedWeekActivity =
-        await WeekActivitiesService.updateWeekActivityApiV1WeekActivitiesWeekActivityIdPut(
-          {
-            weekActivityId,
-            requestBody: {
-              rating,
-              notes: notes || null,
-            },
-          }
-        );
+        await WeekActivitiesService.updateWeekActivityApiV1WeekActivitiesWeekActivityIdPut({
+          weekActivityId,
+          requestBody: {
+            rating,
+            notes: notes || null,
+          },
+        });
 
       setWeekActivities((prev) =>
         prev.map((wa) => (wa.id === weekActivityId ? updatedWeekActivity : wa))
@@ -137,14 +131,15 @@ export default function ParentDashboard() {
 
   async function addActivityToWeek(activityId: number) {
     try {
-      const newWeekActivity =
-        await WeekActivitiesService.createWeekActivityApiV1WeekActivitiesPost({
+      const newWeekActivity = await WeekActivitiesService.createWeekActivityApiV1WeekActivitiesPost(
+        {
           requestBody: {
             activity_id: activityId,
             activity_year: selectedYear,
             activity_week: selectedWeek,
           },
-        });
+        }
+      );
 
       setWeekActivities((prev) => [...prev, newWeekActivity]);
       setShowAddActivityModal(false);
@@ -156,13 +151,11 @@ export default function ParentDashboard() {
 
   async function removeActivityFromWeek(kidId: number | null, activityId: number) {
     try {
-      await WeekActivitiesService.removeActivityFromWeekApiV1WeekActivitiesRemoveDelete(
-        {
-          activityId,
-          year: selectedYear,
-          week: selectedWeek,
-        }
-      );
+      await WeekActivitiesService.removeActivityFromWeekApiV1WeekActivitiesRemoveDelete({
+        activityId,
+        year: selectedYear,
+        week: selectedWeek,
+      });
 
       // Remove from local state
       setWeekActivities((prev) =>

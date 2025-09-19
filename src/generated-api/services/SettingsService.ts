@@ -1,7 +1,7 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
-/* eslint-disable */
+
 import type { AllSettingsResponse } from '../models/AllSettingsResponse';
 import type { FilterOptionsResponse } from '../models/FilterOptionsResponse';
 import type { PreferenceOptionsResponse } from '../models/PreferenceOptionsResponse';

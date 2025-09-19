@@ -372,6 +372,20 @@ export default function ActivitiesBrowser() {
     return `${selectedAges.length} Age Groups`;
   };
 
+  // Helper function to format activity scale display
+  const formatActivityScale = (scale?: string): string => {
+    if (!scale) return '';
+
+    const map: Record<string, string> = {
+      small: 'S',
+      medium: 'M',
+      large: 'L',
+      extra_large: 'XL',
+    };
+
+    return map[scale] || scale;
+  };
+
   // Helper function to format cost display
   const formatCost = (costs?: Cost[]): string => {
     if (!costs?.length) return '';
@@ -878,6 +892,11 @@ export default function ActivitiesBrowser() {
                       </div>
                     )}
                   </div>
+                  {activity.activity_scale && (
+                    <div className="rounded bg-pink-100 px-2 py-1 text-xs font-medium text-pink-800">
+                      <span>{formatActivityScale(activity.activity_scale)}</span>
+                    </div>
+                  )}
                   {/* <button className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline">
                     View Details
                   </button> */}

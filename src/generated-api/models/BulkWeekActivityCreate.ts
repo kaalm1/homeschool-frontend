@@ -7,6 +7,5 @@ import type { WeekActivityCreate } from './WeekActivityCreate';
  * Create multiple week activities at once.
  */
 export type BulkWeekActivityCreate = {
-    assignments: Array<WeekActivityCreate>;
+  assignments: Array<WeekActivityCreate>;
 };
-

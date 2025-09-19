@@ -9,6 +9,7 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 
 export type { ActivityCreate } from './models/ActivityCreate';
 export type { ActivityResponse } from './models/ActivityResponse';
+export { ActivityScale } from './models/ActivityScale';
 export type { ActivityTaggingRequest } from './models/ActivityTaggingRequest';
 export type { ActivityTaggingResponse } from './models/ActivityTaggingResponse';
 export { ActivityType } from './models/ActivityType';

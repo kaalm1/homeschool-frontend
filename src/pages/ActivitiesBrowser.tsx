@@ -13,6 +13,7 @@ import {
   type Location,
   type Theme,
   type ActivityType,
+  type ActivityScale,
 } from '@/generated-api';
 
 type TagCategory =
@@ -48,6 +49,7 @@ const DEFAULT_EDIT_FORM = {
   seasons: [] as Season[],
   age_groups: [] as AgeGroup[],
   frequency: [] as Frequency[],
+  activity_scale: undefined as ActivityScale | undefined,
 };
 
 function hasFilterMatch(
@@ -172,6 +174,7 @@ export default function ActivitiesBrowser() {
       seasons: activity.seasons ?? [],
       age_groups: activity.age_groups ?? [],
       frequency: activity.frequency ?? [],
+      activity_scale: activity.activity_scale ?? undefined,
     });
   };
 
@@ -189,6 +192,7 @@ export default function ActivitiesBrowser() {
       seasons: [],
       age_groups: [],
       frequency: [],
+      activity_scale: undefined,
     });
   };
 

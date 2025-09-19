@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export enum GroupActivityComfort {
-    LOW = 'low',
-    MEDIUM = 'medium',
-    HIGH = 'high',
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
 }

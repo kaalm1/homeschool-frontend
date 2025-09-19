@@ -2,10 +2,9 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
-/**
- * Google auth request model.
- */
-export type GoogleAuthRequest = {
-  code: string;
-  state?: string | null;
-};
+export enum ActivityScale {
+  SMALL = 'small',
+  MEDIUM = 'medium',
+  LARGE = 'large',
+  EXTRA_LARGE = 'extra_large',
+}

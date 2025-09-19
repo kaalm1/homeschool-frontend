@@ -874,6 +874,7 @@ export default function FamilySettings() {
         )}
       </div>
       <Toaster
+        closeButton
         position="top-center"
         richColors
         expand={true}

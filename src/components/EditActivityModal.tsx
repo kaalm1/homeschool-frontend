@@ -28,6 +28,7 @@ import {
   type ActivityType,
   ActivityScale,
 } from '@/generated-api';
+import ChecklistGenerator from '@/components/ChecklistGenerator';
 
 export interface EditForm {
   title: string;
@@ -42,6 +43,9 @@ export interface EditForm {
   age_groups: AgeGroup[];
   frequency: Frequency[];
   activity_scale?: ActivityScale | undefined;
+  equipment?: string[];
+  instructions?: string[];
+  adhd_tips?: string[];
 }
 
 interface EditActivityModalProps {
@@ -145,6 +149,16 @@ export default function EditActivityModal({
     setEditForm((prev) => ({
       ...prev,
       activity_scale: prev.activity_scale === scale ? undefined : scale,
+    }));
+  };
+
+  const handleActivityUpdate = (updatedActivity: ActivityResponse) => {
+    setEditForm((prev) => ({
+      ...prev,
+      // Update the checklist fields from the API response
+      equipment: updatedActivity.equipment || [],
+      instructions: updatedActivity.instructions || [],
+      adhd_tips: updatedActivity.adhd_tips || [],
     }));
   };
 
@@ -359,6 +373,17 @@ export default function EditActivityModal({
                 <CategorySection category="frequency" />
               </div>
             </div>
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="flex items-center space-x-2 text-lg font-semibold text-gray-900">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100">
+                <span className="text-sm font-bold text-orange-600">4</span>
+              </div>
+              <span>Activity Checklist</span>
+            </h3>
+
+            <ChecklistGenerator activity={activity} onActivityUpdate={handleActivityUpdate} />
           </div>
         </div>
 

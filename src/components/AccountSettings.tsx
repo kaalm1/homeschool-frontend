@@ -102,7 +102,7 @@ export default function AccountSettings() {
             />
           </div>
 
-          <div>
+          {/* <div>
             <label className="mb-1 block text-sm font-medium">
               <Lock className="mr-1 inline h-4 w-4" />
               New Password
@@ -114,7 +114,7 @@ export default function AccountSettings() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
             />
-          </div>
+          </div> */}
         </div>
 
         <div className="mt-6 flex gap-3">

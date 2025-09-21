@@ -694,6 +694,8 @@ export default function ActivitiesBrowser() {
           onSave={saveEdit}
           onCancel={cancelEdit}
           isSaving={savingEdit}
+          setActivities={setActivities}
+          setEditingActivity={setEditingActivity}
         />
       )}
 

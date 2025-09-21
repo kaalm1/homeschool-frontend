@@ -322,7 +322,7 @@ export class ActivitiesService {
   }): CancelablePromise<ActivityResponse> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/v1/activities{activity_id}/checklist',
+      url: '/api/v1/activities/{activity_id}/checklist',
       path: {
         activity_id: activityId,
       },
@@ -344,7 +344,7 @@ export class ActivitiesService {
   }): CancelablePromise<ActivityResponse> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/v1/activities{activity_id}/checklist',
+      url: '/api/v1/activities/{activity_id}/checklist',
       path: {
         activity_id: activityId,
       },

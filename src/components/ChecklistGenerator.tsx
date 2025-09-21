@@ -127,6 +127,13 @@ export default function ChecklistGenerator({
     await handleGenerateChecklist();
   };
 
+  React.useEffect(() => {
+    const hasData = Boolean(
+      activity.equipment?.length || activity.instructions?.length || activity.adhd_tips?.length
+    );
+    setHasChecklist(hasData);
+  }, [activity.equipment, activity.instructions, activity.adhd_tips]);
+
   if (!hasChecklist) {
     return (
       <div className="rounded-xl border border-gray-200 bg-gradient-to-br from-blue-50 to-indigo-50 p-6">

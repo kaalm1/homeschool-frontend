@@ -56,6 +56,8 @@ interface EditActivityModalProps {
   onSave: () => Promise<void>;
   onCancel: () => void;
   isSaving: boolean;
+  setActivities: React.Dispatch<React.SetStateAction<ActivityResponse[]>>;
+  setEditingActivity: React.Dispatch<React.SetStateAction<ActivityResponse | null>>;
 }
 
 const categoryIcons = {
@@ -109,6 +111,8 @@ export default function EditActivityModal({
   onSave,
   onCancel,
   isSaving,
+  setActivities,
+  setEditingActivity,
 }: EditActivityModalProps) {
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     basic: true,
@@ -155,11 +159,16 @@ export default function EditActivityModal({
   const handleActivityUpdate = (updatedActivity: ActivityResponse) => {
     setEditForm((prev) => ({
       ...prev,
-      // Update the checklist fields from the API response
       equipment: updatedActivity.equipment || [],
       instructions: updatedActivity.instructions || [],
       adhd_tips: updatedActivity.adhd_tips || [],
     }));
+
+    setActivities((prev) =>
+      prev.map((act) => (act.id === updatedActivity.id ? updatedActivity : act))
+    );
+
+    setEditingActivity(updatedActivity);
   };
 
   const CategorySection = ({ category }: { category: keyof typeof categoryIcons }) => {

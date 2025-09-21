@@ -41,6 +41,7 @@ import type {
 } from '@/generated-api';
 import { Toaster, toast } from 'sonner';
 import LocationInput from '@/components/LocationInput';
+import AccountSettings from '@/components/AccountSettings';
 
 interface FamilyPreferences {
   preferred_themes: Theme[];
@@ -651,6 +652,16 @@ export default function FamilySettings() {
             >
               Schedule & Comfort
             </button>
+            <button
+              onClick={() => setActiveTab('account')}
+              className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === 'account'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
+              } `}
+            >
+              Account Settings
+            </button>
           </nav>
         </div>
 
@@ -872,6 +883,8 @@ export default function FamilySettings() {
             />
           </div>
         )}
+
+        {activeTab === 'account' && <AccountSettings />}
       </div>
       <Toaster
         closeButton

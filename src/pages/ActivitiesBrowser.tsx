@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Search, Filter, Plus, Clock, Users, MapPin, Check, X, Edit3, Trash2 } from 'lucide-react';
+import { Search, Filter, Plus, Clock, Users, MapPin, Edit3, Trash2, X } from 'lucide-react';
 import {
   ActivitiesService,
   LlmService,
@@ -16,6 +16,7 @@ import {
   type ActivityScale,
 } from '@/generated-api';
 import Swal from 'sweetalert2';
+import EditActivityModal, { type EditForm } from '@/components/EditActivityModal';
 
 type TagCategory =
   | 'themes'
@@ -38,7 +39,7 @@ type FilterValue =
   | AgeGroup
   | Frequency;
 
-const DEFAULT_EDIT_FORM = {
+const DEFAULT_EDIT_FORM: EditForm = {
   title: '',
   description: '',
   themes: [] as Theme[],
@@ -72,8 +73,9 @@ export default function ActivitiesBrowser() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newActivityText, setNewActivityText] = useState('');
   const [addingActivity, setAddingActivity] = useState(false);
-  const [editingActivity, setEditingActivity] = useState<number | null>(null);
+  const [editingActivity, setEditingActivity] = useState<ActivityResponse | null>(null);
   const [editForm, setEditForm] = useState(DEFAULT_EDIT_FORM);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -139,17 +141,6 @@ export default function ActivitiesBrowser() {
     return Object.values(selectedFilters).reduce((total, values) => total + values.length, 0);
   };
 
-  const toggleActivity = async (activityId: number) => {
-    try {
-      const updated = await ActivitiesService.toggleActivityApiV1ActivitiesActivityIdTogglePost({
-        activityId,
-      });
-      setActivities((prev) => prev.map((a) => (a.id === activityId ? updated : a)));
-    } catch (err) {
-      console.error('Failed to toggle activity:', err);
-    }
-  };
-
   const deleteActivity = async (activityId: number) => {
     const result = await Swal.fire({
       title: 'Delete Activity?',
@@ -160,7 +151,7 @@ export default function ActivitiesBrowser() {
       cancelButtonColor: '#6b7280',
       confirmButtonText: 'Yes, delete it!',
       cancelButtonText: 'Cancel',
-      reverseButtons: true, // Cancel on left, Delete on right
+      reverseButtons: true,
     });
 
     if (!result.isConfirmed) return;
@@ -174,7 +165,7 @@ export default function ActivitiesBrowser() {
   };
 
   const startEdit = (activity: ActivityResponse) => {
-    setEditingActivity(activity.id);
+    setEditingActivity(activity);
     setEditForm({
       title: activity.title ?? '',
       description: activity.description ?? '',
@@ -193,59 +184,32 @@ export default function ActivitiesBrowser() {
 
   const cancelEdit = () => {
     setEditingActivity(null);
-    setEditForm({
-      title: '',
-      description: '',
-      themes: [],
-      activity_types: [],
-      locations: [],
-      costs: [],
-      durations: [],
-      participants: [],
-      seasons: [],
-      age_groups: [],
-      frequency: [],
-      activity_scale: undefined,
-    });
-  };
-
-  const handleTagChange = (tagCategory: string, value: string, checked: boolean) => {
-    setEditForm((prev) => {
-      const currentValues = (prev[tagCategory as keyof typeof prev] as string[]) || [];
-      let newValues: string[];
-
-      if (checked) {
-        newValues = [...currentValues, value];
-      } else {
-        newValues = currentValues.filter((v) => v !== value);
-      }
-
-      return {
-        ...prev,
-        [tagCategory]: newValues,
-      };
-    });
+    setEditForm(DEFAULT_EDIT_FORM);
+    setSavingEdit(false);
   };
 
   const saveEdit = async () => {
     if (!editingActivity) return;
 
     try {
-      await ActivitiesService.updateActivityApiV1ActivitiesActivityIdPatch({
-        activityId: editingActivity,
+      setSavingEdit(true);
+      const updated = await ActivitiesService.updateActivityApiV1ActivitiesActivityIdPatch({
+        activityId: editingActivity.id,
         requestBody: editForm,
       });
+
+      // Update the activity in the list
       setActivities((prev) =>
-        prev.map((a) =>
-          a.id === editingActivity
-            ? { ...a, title: editForm.title, description: editForm.description }
-            : a
-        )
+        prev.map((a) => (a.id === editingActivity.id ? { ...a, ...editForm } : a))
       );
+
       setEditingActivity(null);
       setEditForm(DEFAULT_EDIT_FORM);
     } catch (err) {
       console.error('Failed to update activity:', err);
+      // You might want to show an error toast here
+    } finally {
+      setSavingEdit(false);
     }
   };
 
@@ -255,26 +219,18 @@ export default function ActivitiesBrowser() {
     try {
       setAddingActivity(true);
 
-      // Call LLM tagging API
       const response = await LlmService.tagActivitiesApiV1LlmLlmTagActivitiesPost({
         requestBody: { activities: newActivityText.trim() },
       });
 
-      // Response shape: { tagged_activities: TaggedActivity[], total_count: number }
       const { tagged_activities } = response;
 
       if (!tagged_activities || tagged_activities.length === 0) {
         throw new Error('No activities were tagged');
       }
 
-      // Map tagged activities into your local Activity shape
-      const newActivities = tagged_activities.map((tagged) => ({
-        ...tagged,
-      }));
-
-      // Prepend new activities
+      const newActivities = tagged_activities.map((tagged) => ({ ...tagged }));
       setActivities((prev) => [...newActivities, ...prev]);
-
       setNewActivityText('');
       setShowAddModal(false);
     } catch (err) {
@@ -306,15 +262,14 @@ export default function ActivitiesBrowser() {
     return filters[type]?.find((f) => f.value === String(value))?.label ?? String(value);
   };
 
-  // Helper function to format participants display
+  // Helper functions for formatting (keeping the same as original)
   const formatParticipants = (participants?: Participants[]): string => {
     if (!participants?.length) return '';
 
     if (participants.includes('family' as Participants)) {
-      return '∞'; // Infinity symbol for family/unlimited
+      return '∞';
     }
 
-    // Sort participants by typical order and get min-max range
     const playerCounts = participants
       .filter((p) => p !== 'family')
       .map((p) => {
@@ -349,34 +304,28 @@ export default function ActivitiesBrowser() {
     return `${min}-${max === 10 ? '10+' : max}`;
   };
 
-  // Helper function to format age groups display
   const formatAgeGroups = (ageGroups?: AgeGroup[]): string => {
     if (!ageGroups?.length) return '';
 
     const allAges = ['toddler', 'child', 'tween', 'teen', 'adult', 'family'];
     const selectedAges = ageGroups.filter((age) => allAges.includes(age as string));
 
-    // If family is included, it's for all ages
     if (selectedAges.includes('family' as AgeGroup)) {
       return 'All Ages';
     }
 
-    // If all specific age groups are selected
     if (selectedAges.length >= 4 && selectedAges.includes('toddler' as AgeGroup)) {
       return 'All Ages';
     }
 
-    // If all except toddler
     if (selectedAges.length >= 3 && !selectedAges.includes('toddler' as AgeGroup)) {
       return 'Kids+';
     }
 
-    // If just one age group
     if (selectedAges.length === 1) {
       return getFilterLabel('age_groups', selectedAges[0]);
     }
 
-    // For multiple but not all, show range or count
     if (selectedAges.length === 2) {
       const labels = selectedAges.map((age) => getFilterLabel('age_groups', age));
       return labels.join(', ');
@@ -385,30 +334,25 @@ export default function ActivitiesBrowser() {
     return `${selectedAges.length} Age Groups`;
   };
 
-  // Helper function to format activity scale display
   const formatActivityScale = (scale?: string): string => {
     if (!scale) return '';
-
     const map: Record<string, string> = {
       small: 'S',
       medium: 'M',
       large: 'L',
       extra_large: 'XL',
     };
-
     return map[scale] || scale;
   };
 
-  // Helper function to format cost display
   const formatCost = (costs?: Cost[]): string => {
     if (!costs?.length) return '';
 
     if (costs.includes('free' as Cost)) {
       if (costs.length === 1) return 'FREE';
-      return 'FREE+'; // Has free options plus paid
+      return 'FREE+';
     }
 
-    // Map cost levels to symbols
     const costSymbols = costs
       .map((cost) => {
         if (cost === 'low') return '$';
@@ -424,11 +368,9 @@ export default function ActivitiesBrowser() {
     return '';
   };
 
-  // Helper function to get season display
   const formatSeasons = (seasons?: Season[]): string => {
     if (!seasons?.length) return '';
 
-    // Check if "all" seasons is selected
     if (seasons.includes('all' as Season)) return 'Year-round';
 
     const seasonEmojis: Record<string, string> = {
@@ -456,37 +398,6 @@ export default function ActivitiesBrowser() {
     return `${seasons.length} Seasons`;
   };
 
-  const TagCheckboxGroup = ({
-    tagCategory,
-    options,
-    selectedValues,
-    onChange,
-  }: {
-    tagCategory: string;
-    options: { value: string; label: string }[];
-    selectedValues: string[];
-    onChange: (category: string, value: string, checked: boolean) => void;
-  }) => (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-700 capitalize">
-        {tagCategory.replace('_', ' ')}
-      </label>
-      <div className="max-h-32 space-y-1 overflow-y-auto rounded-md border bg-gray-50 p-2">
-        {options.map((option) => (
-          <label key={option.value} className="flex items-center space-x-2 text-sm">
-            <input
-              type="checkbox"
-              checked={selectedValues.includes(option.value)}
-              onChange={(e) => onChange(tagCategory, option.value, e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <span className="text-gray-700">{option.label}</span>
-          </label>
-        ))}
-      </div>
-    </div>
-  );
-
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -511,7 +422,6 @@ export default function ActivitiesBrowser() {
               >
                 ← Back to Dashboard
               </button>
-              {/* <h1 className="text-2xl font-bold text-gray-900">Activity Explorer</h1> */}
             </div>
             <div className="flex items-center space-x-3">
               <button
@@ -530,7 +440,6 @@ export default function ActivitiesBrowser() {
         {/* Search and Filter Controls */}
         <div className="mb-8">
           <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
-            {/* Search Bar */}
             <div className="relative max-w-md flex-1">
               <Search
                 className="absolute top-1/2 left-3 -translate-y-1/2 transform text-gray-400"
@@ -545,7 +454,6 @@ export default function ActivitiesBrowser() {
               />
             </div>
 
-            {/* Filter Toggle */}
             <div className="flex items-center space-x-3">
               <button
                 onClick={() => setShowFilters(!showFilters)}
@@ -634,287 +542,124 @@ export default function ActivitiesBrowser() {
               key={activity.id}
               className="group overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md transition-all duration-200 hover:shadow-lg"
             >
-              {/* Card Header */}
               <div className="p-6">
                 <div className="mb-3 flex items-start justify-between">
                   <div className="flex-1">
-                    {editingActivity === activity.id ? (
-                      <div className="space-y-4">
-                        {/* Title and Description */}
-                        <div className="space-y-3">
-                          <input
-                            type="text"
-                            value={editForm.title}
-                            onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                            className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
-                            placeholder="Activity title"
-                          />
-                          <textarea
-                            value={editForm.description}
-                            onChange={(e) =>
-                              setEditForm({ ...editForm, description: e.target.value })
-                            }
-                            className="w-full resize-none rounded-md border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
-                            rows={3}
-                            placeholder="Activity description"
-                          />
-                        </div>
-
-                        {/* Tags Section */}
-                        <div className="border-t pt-4">
-                          <h4 className="mb-3 text-sm font-medium text-gray-900">Tags</h4>
-                          <div className="grid max-h-64 grid-cols-2 gap-4 overflow-y-auto">
-                            {/* Themes */}
-                            {filters.themes && (
-                              <TagCheckboxGroup
-                                tagCategory="themes"
-                                options={filters.themes}
-                                selectedValues={editForm.themes}
-                                onChange={handleTagChange}
-                              />
-                            )}
-
-                            {/* Types */}
-                            {filters.types && (
-                              <TagCheckboxGroup
-                                tagCategory="types"
-                                options={filters.types}
-                                selectedValues={editForm.activity_types}
-                                onChange={handleTagChange}
-                              />
-                            )}
-
-                            {/* Locations */}
-                            {filters.locations && (
-                              <TagCheckboxGroup
-                                tagCategory="locations"
-                                options={filters.locations}
-                                selectedValues={editForm.locations}
-                                onChange={handleTagChange}
-                              />
-                            )}
-
-                            {/* Costs */}
-                            {filters.costs && (
-                              <TagCheckboxGroup
-                                tagCategory="costs"
-                                options={filters.costs}
-                                selectedValues={editForm.costs}
-                                onChange={handleTagChange}
-                              />
-                            )}
-
-                            {/* Durations */}
-                            {filters.durations && (
-                              <TagCheckboxGroup
-                                tagCategory="durations"
-                                options={filters.durations}
-                                selectedValues={editForm.durations}
-                                onChange={handleTagChange}
-                              />
-                            )}
-
-                            {/* Participants */}
-                            {filters.participants && (
-                              <TagCheckboxGroup
-                                tagCategory="participants"
-                                options={filters.participants}
-                                selectedValues={editForm.participants}
-                                onChange={handleTagChange}
-                              />
-                            )}
-
-                            {/* Seasons */}
-                            {filters.seasons && (
-                              <TagCheckboxGroup
-                                tagCategory="seasons"
-                                options={filters.seasons}
-                                selectedValues={editForm.seasons}
-                                onChange={handleTagChange}
-                              />
-                            )}
-
-                            {/* Age Groups */}
-                            {filters.age_groups && (
-                              <TagCheckboxGroup
-                                tagCategory="age_groups"
-                                options={filters.age_groups}
-                                selectedValues={editForm.age_groups}
-                                onChange={handleTagChange}
-                              />
-                            )}
-
-                            {/* Frequency */}
-                            {filters.frequency && (
-                              <TagCheckboxGroup
-                                tagCategory="frequency"
-                                options={filters.frequency}
-                                selectedValues={editForm.frequency}
-                                onChange={handleTagChange}
-                              />
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex space-x-2 border-t pt-3">
-                          <button
-                            onClick={saveEdit}
-                            className="flex items-center space-x-1 rounded-md bg-green-600 px-3 py-1 text-sm text-white transition-colors hover:bg-green-700"
-                          >
-                            <Check size={14} />
-                            <span>Save</span>
-                          </button>
-                          <button
-                            onClick={cancelEdit}
-                            className="flex items-center space-x-1 rounded-md bg-gray-500 px-3 py-1 text-sm text-white transition-colors hover:bg-gray-600"
-                          >
-                            <X size={14} />
-                            <span>Cancel</span>
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <h3 className="text-lg font-bold text-gray-900 transition-colors group-hover:text-blue-600">
-                          {activity.title}
-                        </h3>
-                        <p className="mt-1 text-sm text-gray-500">
-                          Assigned to: <span className="font-medium">Family</span>
-                        </p>
-                      </>
-                    )}
+                    <h3 className="text-lg font-bold text-gray-900 transition-colors group-hover:text-blue-600">
+                      {activity.title}
+                    </h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Assigned to: <span className="font-medium">Family</span>
+                    </p>
                   </div>
 
-                  {editingActivity !== activity.id && (
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => startEdit(activity)}
-                        className="p-1 text-gray-400 transition-colors hover:text-blue-600"
-                        title="Edit activity"
-                      >
-                        <Edit3 size={16} />
-                      </button>
-                      <button
-                        onClick={() => deleteActivity(activity.id)}
-                        className="p-1 text-gray-400 transition-colors hover:text-red-600"
-                        title="Delete activity"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                      {/* <button
-                        onClick={() => toggleActivity(activity.id)}
-                        className="text-2xl transition-transform hover:scale-110"
-                        title={activity.done ? 'Mark as incomplete' : 'Mark as complete'}
-                      >
-                        {activity.done ? '✅' : '⬜️'}
-                      </button> */}
-                    </div>
-                  )}
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => startEdit(activity)}
+                      className="p-1 text-gray-400 transition-colors hover:text-blue-600"
+                      title="Edit activity"
+                    >
+                      <Edit3 size={16} />
+                    </button>
+                    <button
+                      onClick={() => deleteActivity(activity.id)}
+                      className="p-1 text-gray-400 transition-colors hover:text-red-600"
+                      title="Delete activity"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
 
-                {editingActivity !== activity.id && (
-                  <>
-                    <p className="mb-4 line-clamp-2 text-sm text-gray-600">
-                      {activity.description}
-                    </p>
+                <p className="mb-4 line-clamp-2 text-sm text-gray-600">{activity.description}</p>
 
-                    {/* Quick Info Icons */}
-                    <div className="mb-4 flex items-center space-x-4 text-sm text-gray-500">
-                      <div className="flex items-center space-x-1">
-                        <Clock size={14} />
-                        <span>{getFilterLabel('durations', activity.durations?.[0])}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <Users size={14} />
-                        <span>{formatParticipants(activity.participants ?? undefined)}</span>
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <MapPin size={14} />
-                        <span>{getFilterLabel('locations', activity.locations?.[0])}</span>
-                      </div>
+                {/* Quick Info Icons */}
+                <div className="mb-4 flex items-center space-x-4 text-sm text-gray-500">
+                  <div className="flex items-center space-x-1">
+                    <Clock size={14} />
+                    <span>{getFilterLabel('durations', activity.durations?.[0])}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Users size={14} />
+                    <span>{formatParticipants(activity.participants ?? undefined)}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <MapPin size={14} />
+                    <span>{getFilterLabel('locations', activity.locations?.[0])}</span>
+                  </div>
+                </div>
+
+                {/* Tags */}
+                <div className="space-y-2">
+                  {activity.themes?.length ? (
+                    <div className="flex flex-wrap gap-1">
+                      {activity.themes.slice(0, 2).map((theme) => (
+                        <span
+                          key={theme}
+                          className={`rounded-full px-2 py-1 text-xs font-medium ${getTagColor('themes')}`}
+                        >
+                          {getFilterLabel('themes', theme)}
+                        </span>
+                      ))}
+                      {activity.themes.length > 2 && (
+                        <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+                          +{activity.themes.length - 2} more
+                        </span>
+                      )}
                     </div>
+                  ) : null}
 
-                    {/* Tags */}
-                    <div className="space-y-2">
-                      {/* Themes */}
-                      {activity.themes?.length ? (
-                        <div className="flex flex-wrap gap-1">
-                          {activity.themes.slice(0, 2).map((theme) => (
-                            <span
-                              key={theme}
-                              className={`rounded-full px-2 py-1 text-xs font-medium ${getTagColor('themes')}`}
-                            >
-                              {getFilterLabel('themes', theme)}
-                            </span>
-                          ))}
-                          {activity.themes.length > 2 && (
-                            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
-                              +{activity.themes.length - 2} more
-                            </span>
-                          )}
-                        </div>
-                      ) : null}
-
-                      {/* Activity Types */}
-                      {activity.activity_types?.length ? (
-                        <div className="flex flex-wrap gap-1">
-                          {activity.activity_types.slice(0, 2).map((type) => (
-                            <span
-                              key={type}
-                              className={`rounded-full px-2 py-1 text-xs font-medium ${getTagColor('activity_types')}`}
-                            >
-                              {getFilterLabel('activity_types', type)}
-                            </span>
-                          ))}
-                          {activity.activity_types.length > 2 && (
-                            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
-                              +{activity.activity_types.length - 2} more
-                            </span>
-                          )}
-                        </div>
-                      ) : null}
+                  {activity.activity_types?.length ? (
+                    <div className="flex flex-wrap gap-1">
+                      {activity.activity_types.slice(0, 2).map((type) => (
+                        <span
+                          key={type}
+                          className={`rounded-full px-2 py-1 text-xs font-medium ${getTagColor('activity_types')}`}
+                        >
+                          {getFilterLabel('activity_types', type)}
+                        </span>
+                      ))}
+                      {activity.activity_types.length > 2 && (
+                        <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600">
+                          +{activity.activity_types.length - 2} more
+                        </span>
+                      )}
                     </div>
-                  </>
-                )}
+                  ) : null}
+                </div>
               </div>
 
               {/* Card Actions */}
-              {editingActivity !== activity.id && (
-                <div className="flex items-center justify-between border-t bg-gray-50 px-6 py-4">
-                  <div className="flex items-center space-x-2">
-                    {activity.costs?.length && (
-                      <span
-                        className={`rounded px-2 py-1 text-xs font-medium ${
-                          activity.costs.includes('free' as Cost)
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}
-                      >
-                        {formatCost(activity.costs)}
-                      </span>
-                    )}
-                    {activity.age_groups?.length && (
-                      <span className="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
-                        {formatAgeGroups(activity.age_groups)}
-                      </span>
-                    )}
-                    {activity.seasons?.length && (
-                      <div className="rounded bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800">
-                        <span>{formatSeasons(activity.seasons)}</span>
-                      </div>
-                    )}
-                  </div>
-                  {activity.activity_scale && (
-                    <div className="rounded bg-pink-100 px-2 py-1 text-xs font-medium text-pink-800">
-                      <span>{formatActivityScale(activity.activity_scale)}</span>
+              <div className="flex items-center justify-between border-t bg-gray-50 px-6 py-4">
+                <div className="flex items-center space-x-2">
+                  {activity.costs?.length && (
+                    <span
+                      className={`rounded px-2 py-1 text-xs font-medium ${
+                        activity.costs.includes('free' as Cost)
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}
+                    >
+                      {formatCost(activity.costs)}
+                    </span>
+                  )}
+                  {activity.age_groups?.length && (
+                    <span className="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+                      {formatAgeGroups(activity.age_groups)}
+                    </span>
+                  )}
+                  {activity.seasons?.length && (
+                    <div className="rounded bg-purple-100 px-2 py-1 text-xs font-medium text-purple-800">
+                      <span>{formatSeasons(activity.seasons)}</span>
                     </div>
                   )}
-                  {/* <button className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline">
-                    View Details
-                  </button> */}
                 </div>
-              )}
+                {activity.activity_scale && (
+                  <div className="rounded bg-pink-100 px-2 py-1 text-xs font-medium text-pink-800">
+                    <span>{formatActivityScale(activity.activity_scale)}</span>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -938,6 +683,19 @@ export default function ActivitiesBrowser() {
           </div>
         )}
       </div>
+
+      {/* Edit Activity Modal */}
+      {editingActivity && (
+        <EditActivityModal
+          activity={editingActivity}
+          editForm={editForm}
+          setEditForm={setEditForm}
+          filters={filters}
+          onSave={saveEdit}
+          onCancel={cancelEdit}
+          isSaving={savingEdit}
+        />
+      )}
 
       {/* Add Activity Modal */}
       {showAddModal && (

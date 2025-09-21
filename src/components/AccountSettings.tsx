@@ -3,6 +3,7 @@ import { User, Mail, Lock, Trash2, Save } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import { UsersService } from '@/generated-api/services/UsersService';
 import type { UserResponse, UserUpdate } from '@/generated-api';
+import { useNavigate } from 'react-router-dom';
 
 export default function AccountSettings() {
   const [profile, setProfile] = useState<UserResponse | null>(null);
@@ -10,6 +11,8 @@ export default function AccountSettings() {
   const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   // Load user profile on mount
   useEffect(() => {
@@ -61,7 +64,8 @@ export default function AccountSettings() {
               userId: profile.id,
             });
             toast.success('Account deactivated');
-            // TODO: maybe redirect or logout
+            localStorage.clear();
+            navigate('/login');
           } catch (err) {
             console.error(err);
             toast.error('Failed to deactivate account.');

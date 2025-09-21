@@ -310,18 +310,18 @@ export class ActivitiesService {
     });
   }
   /**
-   * Get Checklist
+   * Create Checklist
    * Get activities for the current user. Optionally filter by kid.
    * @returns ActivityResponse Successful Response
    * @throws ApiError
    */
-  public static getChecklistApiV1ActivitiesActivityIdChecklistGet({
+  public static createChecklistApiV1ActivitiesActivityIdChecklistPost({
     activityId,
   }: {
     activityId: number;
   }): CancelablePromise<ActivityResponse> {
     return __request(OpenAPI, {
-      method: 'GET',
+      method: 'POST',
       url: '/api/v1/activities{activity_id}/checklist',
       path: {
         activity_id: activityId,
@@ -332,18 +332,18 @@ export class ActivitiesService {
     });
   }
   /**
-   * Get Checklist
+   * Create Checklist
    * Get activities for the current user. Optionally filter by kid.
    * @returns ActivityResponse Successful Response
    * @throws ApiError
    */
-  public static getChecklistApiV1ActivitiesActivityIdChecklistGet1({
+  public static createChecklistApiV1ActivitiesActivityIdChecklistPost1({
     activityId,
   }: {
     activityId: number;
   }): CancelablePromise<ActivityResponse> {
     return __request(OpenAPI, {
-      method: 'GET',
+      method: 'POST',
       url: '/api/v1/activities{activity_id}/checklist',
       path: {
         activity_id: activityId,

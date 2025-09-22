@@ -4,8 +4,8 @@ import { AuthenticationService, type TokenResponse, type GoogleAuthRequest } fro
 import axios from 'axios';
 
 export default function Login() {
-  const [email, setEmail] = useState('demo@homeschool.app');
-  const [password, setPassword] = useState('demo123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

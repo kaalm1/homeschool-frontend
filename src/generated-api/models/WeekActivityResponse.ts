@@ -16,6 +16,12 @@ export type WeekActivityResponse = {
   rating?: number | null;
   notes?: string | null;
   llm_notes?: string | null;
+  equipment?: Array<string> | null;
+  instructions?: Array<string> | null;
+  adhd_tips?: Array<string> | null;
+  equipment_done?: Array<string> | null;
+  instructions_done?: Array<string> | null;
+  adhd_tips_done?: Array<string> | null;
   activity_title?: string | null;
   activity_description?: string | null;
   activity_equipment?: Array<string> | null;

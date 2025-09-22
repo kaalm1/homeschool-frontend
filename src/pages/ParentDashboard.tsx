@@ -8,8 +8,8 @@ import {
 } from '@/generated-api';
 import { type SelectedFilters, useActivityFiltering } from '@/components/SearchAndFilter';
 import { Star, CheckSquare, Sparkles, Square, Trash2 } from 'lucide-react';
-import ActivitySelector from '@/components/ActivitySelector';
-import PlanWeekModal from '@/components/PlanWeekModal';
+import ActivitySelector from '@/components/ParentDashboard/ActivitySelector';
+import PlanWeekModal from '@/components/ParentDashboard/PlanWeekModal';
 
 export enum WeekStatus {
   Past = 'past',

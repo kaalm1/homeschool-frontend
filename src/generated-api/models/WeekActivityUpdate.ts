@@ -22,4 +22,10 @@ export type WeekActivityUpdate = {
    * Optional notes about the experience
    */
   notes?: string | null;
+  equipment?: Array<string> | null;
+  instructions?: Array<string> | null;
+  adhd_tips?: Array<string> | null;
+  equipment_done?: Array<string> | null;
+  instructions_done?: Array<string> | null;
+  adhd_tips_done?: Array<string> | null;
 };

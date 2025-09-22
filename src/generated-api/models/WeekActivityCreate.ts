@@ -24,4 +24,7 @@ export type WeekActivityCreate = {
   activity_year?: number | null;
   llm_suggestion?: boolean | null;
   llm_notes?: string | null;
+  equipment?: Array<string> | null;
+  instructions?: Array<string> | null;
+  adhd_tips?: Array<string> | null;
 };

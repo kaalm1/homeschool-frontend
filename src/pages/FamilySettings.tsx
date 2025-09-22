@@ -41,7 +41,7 @@ import type {
 } from '@/generated-api';
 import { Toaster, toast } from 'sonner';
 import LocationInput from '@/components/LocationInput';
-import AccountSettings from '@/components/AccountSettings';
+import AccountSettings from '@/components/FamilySettings/AccountSettings';
 
 interface FamilyPreferences {
   preferred_themes: Theme[];

@@ -28,7 +28,7 @@ import {
   type ActivityType,
   ActivityScale,
 } from '@/generated-api';
-import ChecklistGenerator from '@/components/ChecklistGenerator';
+import ChecklistGenerator from '@/components/ActivitiesBrowser/ChecklistGenerator';
 
 export interface EditForm {
   title: string;

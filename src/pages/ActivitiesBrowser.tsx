@@ -16,7 +16,7 @@ import {
   type ActivityScale,
 } from '@/generated-api';
 import Swal from 'sweetalert2';
-import EditActivityModal, { type EditForm } from '@/components/EditActivityModal';
+import EditActivityModal, { type EditForm } from '@/components/ActivitiesBrowser/EditActivityModal';
 
 type TagCategory =
   | 'themes'

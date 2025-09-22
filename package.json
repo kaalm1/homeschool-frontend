@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "generate-api": "node scripts/generate-api.js",
-    "generate-api:prod": "node scripts/generate-api.js --prod",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",

@@ -7,9 +7,10 @@ import {
   type WeekActivityResponse,
 } from '@/generated-api';
 import { type SelectedFilters, useActivityFiltering } from '@/components/SearchAndFilter';
-import { Star, CheckSquare, Sparkles, Square, Trash2 } from 'lucide-react';
+import { Star, CheckSquare, Sparkles, Square, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import ActivitySelector from '@/components/ParentDashboard/ActivitySelector';
 import PlanWeekModal from '@/components/ParentDashboard/PlanWeekModal';
+import ActivityChecklistManager from '@/components/ParentDashboard/ActivityChecklistManager';
 
 export enum WeekStatus {
   Past = 'past',
@@ -49,6 +50,7 @@ export default function ParentDashboard() {
   const [showAddActivityModal, setShowAddActivityModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({});
+  const [expandedActivities, setExpandedActivities] = useState<Set<number>>(new Set());
 
   const availableActivities = allActivities.filter((activity) => {
     return activity;
@@ -165,6 +167,24 @@ export default function ParentDashboard() {
     } catch (err) {
       console.error('Error removing activity from week:', err);
     }
+  }
+
+  function handleActivityUpdate(updatedActivity: WeekActivityResponse) {
+    setWeekActivities((prev) =>
+      prev.map((wa) => (wa.id === updatedActivity.id ? updatedActivity : wa))
+    );
+  }
+
+  function toggleActivityExpanded(activityId: number) {
+    setExpandedActivities(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(activityId)) {
+        newSet.delete(activityId);
+      } else {
+        newSet.add(activityId);
+      }
+      return newSet;
+    });
   }
 
   function goToCurrentWeek() {
@@ -300,87 +320,122 @@ export default function ParentDashboard() {
           </div>
         </div>
 
-        <div className="space-y-3">
-          {weekActivities.map((wa) => (
-            <div
-              key={wa.id}
-              className={`rounded-lg border p-4 ${
-                wa.completed ? 'border-purple-200 bg-purple-50' : 'border-gray-200 bg-gray-50'
-              }`}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h4 className="flex items-center font-medium">{wa.activity_title}</h4>
-                  {wa.activity_description && (
-                    <p className="mt-1 text-sm text-gray-600">{wa.activity_description}</p>
-                  )}
-                  {wa.llm_notes && (
-                    <p className="mt-2 text-sm text-gray-500 italic">"{wa.llm_notes}"</p>
-                  )}
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => toggleWeekActivity(wa.id)}
-                    className="text-2xl transition-transform hover:scale-110"
-                    title={wa.completed ? 'Mark as incomplete' : 'Mark as complete'}
-                  >
-                    {wa.completed ? (
-                      <CheckSquare className="h-6 w-6 text-green-500" />
-                    ) : (
-                      <Square className="h-6 w-6 text-gray-400" />
-                    )}
-                  </button>
-                  <button
-                    onClick={() => removeActivityFromWeek(null, wa.activity_id)} // Use null for family activities
-                    className="text-red-500 hover:text-red-700"
-                    title="Remove from week"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
+        <div className="space-y-4">
+          {weekActivities.map((wa) => {
+            const isExpanded = expandedActivities.has(wa.id);
+            const hasChecklists = (wa.equipment?.length) || 
+                                 (wa.instructions?.length) || 
+                                 (wa.adhd_tips?.length);
 
-              {/* Rating Section */}
-              {weekStatus !== WeekStatus.Future && (
-                <div className="mt-3 flex items-center space-x-4">
-                  <span className="text-sm text-gray-600">Family Rating:</span>
-                  <div className="flex space-x-1">
-                    {[1, 2, 3, 4, 5].map((star) => {
-                      const isFilled = (wa.rating || 0) >= star;
-                      return (
-                        <button
-                          key={star}
-                          onClick={() => updateWeekActivityRating(wa.id, star)}
-                          className="hover:text-yellow-400"
-                        >
-                          {isFilled ? (
-                            <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                          ) : (
-                            <Star className="h-5 w-5 text-gray-300" />
-                          )}
-                        </button>
-                      );
-                    })}
+            return (
+              <div
+                key={wa.id}
+                className={`rounded-lg border transition-all ${
+                  wa.completed ? 'border-purple-200 bg-purple-50' : 'border-gray-200 bg-gray-50'
+                }`}
+              >
+                <div className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <h4 className="font-medium">{wa.activity_title}</h4>
+                        {hasChecklists && (
+                          <button
+                            onClick={() => toggleActivityExpanded(wa.id)}
+                            className="rounded-full bg-gray-100 p-1 text-gray-500 hover:bg-gray-200"
+                            title={isExpanded ? "Hide details" : "Show details"}
+                          >
+                            {isExpanded ? (
+                              <ChevronUp className="h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4" />
+                            )}
+                          </button>
+                        )}
+                      </div>
+                      {wa.activity_description && (
+                        <p className="mt-1 text-sm text-gray-600">{wa.activity_description}</p>
+                      )}
+                      {wa.llm_notes && (
+                        <p className="mt-2 text-sm text-gray-500 italic">"{wa.llm_notes}"</p>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => toggleWeekActivity(wa.id)}
+                        className="text-2xl transition-transform hover:scale-110"
+                        title={wa.completed ? 'Mark as incomplete' : 'Mark as complete'}
+                      >
+                        {wa.completed ? (
+                          <CheckSquare className="h-6 w-6 text-green-500" />
+                        ) : (
+                          <Square className="h-6 w-6 text-gray-400" />
+                        )}
+                      </button>
+                      <button
+                        onClick={() => removeActivityFromWeek(null, wa.activity_id)} // Use null for family activities
+                        className="text-red-500 hover:text-red-700"
+                        title="Remove from week"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Rating Section */}
+                  {weekStatus !== WeekStatus.Future && (
+                    <div className="mt-3 flex items-center space-x-4">
+                      <span className="text-sm text-gray-600">Family Rating:</span>
+                      <div className="flex space-x-1">
+                        {[1, 2, 3, 4, 5].map((star) => {
+                          const isFilled = (wa.rating || 0) >= star;
+                          return (
+                            <button
+                              key={star}
+                              onClick={() => updateWeekActivityRating(wa.id, star)}
+                              className="hover:text-yellow-400"
+                            >
+                              {isFilled ? (
+                                <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                              ) : (
+                                <Star className="h-5 w-5 text-gray-300" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Notes input */}
+                  <div className="mt-2">
+                    <input
+                      type="text"
+                      placeholder="Add family notes..."
+                      defaultValue={wa.notes || ''}
+                      onBlur={(e) => {
+                        if (e.target.value !== (wa.notes || '')) {
+                          updateWeekActivityRating(wa.id, wa.rating || 0, e.target.value);
+                        }
+                      }}
+                      className="w-full rounded-md border border-gray-300 px-3 py-1 text-sm"
+                    />
                   </div>
                 </div>
-              )}
 
-              {/* Notes input */}
-              <div className="mt-2">
-                <input
-                  type="text"
-                  placeholder="Add family notes..."
-                  defaultValue={wa.notes || ''}
-                  onBlur={(e) => {
-                    if (e.target.value !== (wa.notes || '')) {
-                      updateWeekActivityRating(wa.id, wa.rating || 0, e.target.value);
-                    }
-                  }}
-                  className="w-full rounded-md border border-gray-300 px-3 py-1 text-sm"
-                />
+                {/* Expanded Checklist Section */}
+                {isExpanded && hasChecklists && (
+                  <div className="border-t bg-white p-4">
+                    <ActivityChecklistManager
+                      weekActivity={wa}
+                      onUpdate={handleActivityUpdate}
+                      readOnly={weekStatus === WeekStatus.Past}
+                    />
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {weekActivities.length === 0 && (
             <div className="py-8 text-center text-gray-500">

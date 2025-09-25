@@ -323,8 +323,11 @@ export default function ParentDashboard() {
         <div className="space-y-4">
           {weekActivities.map((wa) => {
             const isExpanded = expandedActivities.has(wa.id);
-            const hasChecklists =
-              wa.equipment?.length || wa.instructions?.length || wa.adhd_tips?.length;
+            const hasChecklists = !!(
+              wa.equipment?.length ||
+              wa.instructions?.length ||
+              wa.adhd_tips?.length
+            );
 
             return (
               <div

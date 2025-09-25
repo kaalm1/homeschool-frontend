@@ -39,6 +39,12 @@ type FilterValue =
   | AgeGroup
   | Frequency;
 
+type PendingActivity = {
+  id: string; // temporary UUID
+  text: string;
+  status: 'loading' | 'error';
+};
+
 const DEFAULT_EDIT_FORM: EditForm = {
   title: '',
   description: '',
@@ -76,6 +82,7 @@ export default function ActivitiesBrowser() {
   const [editingActivity, setEditingActivity] = useState<ActivityResponse | null>(null);
   const [editForm, setEditForm] = useState(DEFAULT_EDIT_FORM);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [pendingActivities, setPendingActivities] = useState<PendingActivity[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -213,12 +220,19 @@ export default function ActivitiesBrowser() {
     }
   };
 
-  const addActivities = async () => {
+  const handleAddActivity = async (newActivityText: string) => {
+    setShowAddModal(false);
     if (!newActivityText.trim()) return;
 
-    try {
-      setAddingActivity(true);
+    const tempId = crypto.randomUUID();
 
+    // insert ghost card
+    setPendingActivities((prev) => [
+      ...prev,
+      { id: tempId, text: newActivityText, status: 'loading' },
+    ]);
+
+    try {
       const response = await LlmService.tagActivitiesApiV1LlmLlmTagActivitiesPost({
         requestBody: { activities: newActivityText.trim() },
       });
@@ -229,13 +243,17 @@ export default function ActivitiesBrowser() {
         throw new Error('No activities were tagged');
       }
 
+      // ✅ replace ghost with real activity
+      setPendingActivities((prev) => prev.filter((p) => p.id !== tempId));
+
       const newActivities = tagged_activities.map((tagged) => ({ ...tagged }));
       setActivities((prev) => [...newActivities, ...prev]);
       setNewActivityText('');
-      setShowAddModal(false);
     } catch (err) {
-      console.error('Failed to add activity:', err);
-      alert('Failed to add activity. Please try again.');
+      // ❌ mark ghost as error
+      setPendingActivities((prev) =>
+        prev.map((p) => (p.id === tempId ? { ...p, status: 'error' } : p))
+      );
     } finally {
       setAddingActivity(false);
     }
@@ -537,6 +555,36 @@ export default function ActivitiesBrowser() {
 
         {/* Activities Grid */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {pendingActivities.map((activity) => (
+            <div
+              key={activity.id}
+              className="flex flex-col items-center justify-center rounded-2xl border bg-gray-50 p-4 text-gray-700"
+            >
+              {activity.status === 'loading' && (
+                <>
+                  <div className="mb-2 h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+                  <p className="text-sm">Processing “{activity.text}”...</p>
+                </>
+              )}
+
+              {activity.status === 'error' && (
+                <>
+                  <p className="text-sm text-red-600">⚠️ Failed to process “{activity.text}”</p>
+                  <button
+                    onClick={() => {
+                      // remove the failed ghost first
+                      setPendingActivities((prev) => prev.filter((p) => p.id !== activity.id));
+                      // then retry
+                      handleAddActivity(activity.text);
+                    }}
+                    className="mt-2 rounded-lg bg-red-100 px-3 py-1 text-sm hover:bg-red-200"
+                  >
+                    Retry
+                  </button>
+                </>
+              )}
+            </div>
+          ))}
           {filteredActivities.map((activity) => (
             <div
               key={activity.id}
@@ -738,7 +786,7 @@ export default function ActivitiesBrowser() {
                 Cancel
               </button>
               <button
-                onClick={addActivities}
+                onClick={() => handleAddActivity(newActivityText)}
                 disabled={!newActivityText.trim() || addingActivity}
                 className="flex items-center space-x-2 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
               >

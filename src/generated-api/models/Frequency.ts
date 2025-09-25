@@ -1,7 +1,7 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
-/* eslint-disable */
+
 export enum Frequency {
   DAILY = 'daily',
   MULTI_WEEK = 'multi_week',

@@ -1,7 +1,7 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
-/* eslint-disable */
+
 import type { ActivityTaggingRequest } from '../models/ActivityTaggingRequest';
 import type { ActivityTaggingResponse } from '../models/ActivityTaggingResponse';
 import type { CancelablePromise } from '../core/CancelablePromise';

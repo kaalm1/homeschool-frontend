@@ -176,7 +176,7 @@ export default function ParentDashboard() {
   }
 
   function toggleActivityExpanded(activityId: number) {
-    setExpandedActivities(prev => {
+    setExpandedActivities((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(activityId)) {
         newSet.delete(activityId);
@@ -323,9 +323,8 @@ export default function ParentDashboard() {
         <div className="space-y-4">
           {weekActivities.map((wa) => {
             const isExpanded = expandedActivities.has(wa.id);
-            const hasChecklists = (wa.equipment?.length) || 
-                                 (wa.instructions?.length) || 
-                                 (wa.adhd_tips?.length);
+            const hasChecklists =
+              wa.equipment?.length || wa.instructions?.length || wa.adhd_tips?.length;
 
             return (
               <div
@@ -343,7 +342,7 @@ export default function ParentDashboard() {
                           <button
                             onClick={() => toggleActivityExpanded(wa.id)}
                             className="rounded-full bg-gray-100 p-1 text-gray-500 hover:bg-gray-200"
-                            title={isExpanded ? "Hide details" : "Show details"}
+                            title={isExpanded ? 'Hide details' : 'Show details'}
                           >
                             {isExpanded ? (
                               <ChevronUp className="h-4 w-4" />

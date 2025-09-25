@@ -1,18 +1,10 @@
 import { useState } from 'react';
-import { 
-  WeekActivitiesService, 
-  type WeekActivityResponse, 
-  type WeekActivityUpdate 
+import {
+  WeekActivitiesService,
+  type WeekActivityResponse,
+  type WeekActivityUpdate,
 } from '@/generated-api';
-import { 
-  CheckSquare, 
-  Square, 
-  Plus, 
-  Wrench, 
-  BookOpen, 
-  Brain,
-  Trash2 
-} from 'lucide-react';
+import { CheckSquare, Square, Plus, Wrench, BookOpen, Brain, Trash2 } from 'lucide-react';
 
 interface ActivityChecklistManagerProps {
   weekActivity: WeekActivityResponse;
@@ -32,10 +24,10 @@ interface ChecklistSection {
   color: string;
 }
 
-export default function ActivityChecklistManager({ 
-  weekActivity, 
-  onUpdate, 
-  readOnly = false 
+export default function ActivityChecklistManager({
+  weekActivity,
+  onUpdate,
+  readOnly = false,
 }: ActivityChecklistManagerProps) {
   const [newItems, setNewItems] = useState<Record<string, string>>({});
   const [isUpdating, setIsUpdating] = useState(false);
@@ -50,7 +42,7 @@ export default function ActivityChecklistManager({
       doneKey: 'equipment_done',
       activityItemsKey: 'activity_equipment',
       placeholder: 'Add equipment needed...',
-      color: 'blue'
+      color: 'blue',
     },
     {
       title: 'Instructions',
@@ -61,7 +53,7 @@ export default function ActivityChecklistManager({
       doneKey: 'instructions_done',
       activityItemsKey: 'activity_instructions',
       placeholder: 'Add instruction step...',
-      color: 'green'
+      color: 'green',
     },
     {
       title: 'ADHD Tips',
@@ -72,26 +64,27 @@ export default function ActivityChecklistManager({
       doneKey: 'adhd_tips_done',
       activityItemsKey: 'activity_adhd_tips',
       placeholder: 'Add ADHD-friendly tip...',
-      color: 'purple'
-    }
+      color: 'purple',
+    },
   ];
 
   const updateWeekActivity = async (updateData: Partial<WeekActivityUpdate>) => {
     if (isUpdating) return;
-    
+
     setIsUpdating(true);
     try {
-      const updatedActivity = await WeekActivitiesService.updateWeekActivityApiV1WeekActivitiesWeekActivityIdPut({
-        weekActivityId: weekActivity.id,
-        requestBody: {
-          ...updateData,
-          // Preserve existing values
-          completed: weekActivity.completed,
-          rating: weekActivity.rating,
-          notes: weekActivity.notes,
-          llm_notes: weekActivity.llm_notes,
-        }
-      });
+      const updatedActivity =
+        await WeekActivitiesService.updateWeekActivityApiV1WeekActivitiesWeekActivityIdPut({
+          weekActivityId: weekActivity.id,
+          requestBody: {
+            ...updateData,
+            // Preserve existing values
+            completed: weekActivity.completed,
+            rating: weekActivity.rating,
+            notes: weekActivity.notes,
+            llm_notes: weekActivity.llm_notes,
+          },
+        });
       onUpdate(updatedActivity);
     } catch (error) {
       console.error('Error updating week activity:', error);
@@ -102,44 +95,44 @@ export default function ActivityChecklistManager({
 
   const toggleItemDone = (section: ChecklistSection, item: string) => {
     if (readOnly) return;
-    
+
     const currentDone = section.doneItems;
     const isCurrentlyDone = currentDone.includes(item);
-    
-    const newDone = isCurrentlyDone 
-      ? currentDone.filter(doneItem => doneItem !== item)
+
+    const newDone = isCurrentlyDone
+      ? currentDone.filter((doneItem) => doneItem !== item)
       : [...currentDone, item];
-    
+
     updateWeekActivity({
-      [section.doneKey]: newDone
+      [section.doneKey]: newDone,
     });
   };
 
   const addItem = (section: ChecklistSection) => {
     const newItem = newItems[section.itemsKey as string]?.trim();
     if (!newItem || readOnly) return;
-    
+
     const currentItems = section.items;
     if (currentItems.includes(newItem)) return; // Prevent duplicates
-    
+
     const updatedItems = [...currentItems, newItem];
-    
+
     updateWeekActivity({
-      [section.itemsKey]: updatedItems
+      [section.itemsKey]: updatedItems,
     });
-    
-    setNewItems(prev => ({ ...prev, [section.itemsKey]: '' }));
+
+    setNewItems((prev) => ({ ...prev, [section.itemsKey]: '' }));
   };
 
   const removeItem = (section: ChecklistSection, item: string) => {
     if (readOnly) return;
-    
-    const updatedItems = section.items.filter(i => i !== item);
-    const updatedDone = section.doneItems.filter(i => i !== item);
-    
+
+    const updatedItems = section.items.filter((i) => i !== item);
+    const updatedDone = section.doneItems.filter((i) => i !== item);
+
     updateWeekActivity({
       [section.itemsKey]: updatedItems,
-      [section.doneKey]: updatedDone
+      [section.doneKey]: updatedDone,
     });
   };
 
@@ -156,10 +149,10 @@ export default function ActivityChecklistManager({
     text: `text-${color}-700`,
     button: `bg-${color}-500 hover:bg-${color}-600`,
     iconBg: `bg-${color}-100`,
-    iconText: `text-${color}-600`
+    iconText: `text-${color}-600`,
   });
 
-  if (sections.every(section => section.items.length === 0)) {
+  if (sections.every((section) => section.items.length === 0)) {
     return null; // Don't render if no items in any section
   }
 
@@ -167,15 +160,18 @@ export default function ActivityChecklistManager({
     <div className="space-y-4">
       {sections.map((section) => {
         if (section.items.length === 0) return null;
-        
+
         const colors = getColorClasses(section.color);
         const Icon = section.icon;
         const completedCount = section.doneItems.length;
         const totalCount = section.items.length;
         const completionPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
-        
+
         return (
-          <div key={section.title} className={`rounded-lg border ${colors.border} ${colors.bg} p-4`}>
+          <div
+            key={section.title}
+            className={`rounded-lg border ${colors.border} ${colors.bg} p-4`}
+          >
             <div className="mb-3 flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <div className={`rounded-full ${colors.iconBg} p-2`}>
@@ -194,9 +190,7 @@ export default function ActivityChecklistManager({
                       style={{ width: `${completionPercentage}%` }}
                     />
                   </div>
-                  <span className="text-xs text-gray-600">
-                    {Math.round(completionPercentage)}%
-                  </span>
+                  <span className="text-xs text-gray-600">{Math.round(completionPercentage)}%</span>
                 </div>
               )}
             </div>
@@ -225,7 +219,7 @@ export default function ActivityChecklistManager({
                       </button>
                       <span
                         className={`text-sm ${
-                          isDone ? 'line-through text-gray-500' : 'text-gray-700'
+                          isDone ? 'text-gray-500 line-through' : 'text-gray-700'
                         }`}
                       >
                         {item}
@@ -252,14 +246,14 @@ export default function ActivityChecklistManager({
                     placeholder={section.placeholder}
                     value={newItems[section.itemsKey as string] || ''}
                     onChange={(e) =>
-                      setNewItems(prev => ({
+                      setNewItems((prev) => ({
                         ...prev,
-                        [section.itemsKey]: e.target.value
+                        [section.itemsKey]: e.target.value,
                       }))
                     }
                     onKeyPress={(e) => handleKeyPress(e, section)}
                     disabled={isUpdating}
-                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+                    className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none disabled:opacity-50"
                   />
                   <button
                     onClick={() => addItem(section)}

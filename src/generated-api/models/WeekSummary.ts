@@ -1,7 +1,7 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
-/* eslint-disable */
+
 import type { WeekActivityResponse } from './WeekActivityResponse';
 /**
  * Summary of activities for a specific week.

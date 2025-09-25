@@ -18,7 +18,7 @@ export enum WeekStatus {
   Future = 'future',
 }
 
-const getWeekStartDate = (year: number, week: number) => {
+const getWeekStartDate = (week: number, year: number) => {
   const jan1 = new Date(year, 0, 1);
   const days = (week - 1) * 7 - jan1.getDay() + 1;
   const monday = new Date(year, 0, 1 + days);
@@ -70,9 +70,14 @@ export default function ParentDashboard() {
 
   const [showPlanWeekModal, setShowPlanWeekModal] = useState(false);
 
-  async function handleWeekPlanned(additionalNotes: string, location: string) {
+  async function handleWeekPlanned(
+    additionalNotes: string,
+    location: string,
+    chosenWeek: number,
+    chosenYear: number
+  ) {
     setShowPlanWeekModal(false);
-    const weekStartDate = getWeekStartDate(selectedYear, selectedWeek);
+    const weekStartDate = getWeekStartDate(chosenWeek, chosenYear);
 
     // Add phantom cards immediately
     const newPending = [

@@ -5,7 +5,12 @@ import { Calendar, Sparkles, X, Loader2, MapPin, AlertCircle } from 'lucide-reac
 interface PlanWeekModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onWeekPlanned: (additionalNotes: string, location: string) => void;
+  onWeekPlanned: (
+    additionalNotes: string,
+    location: string,
+    chosenWeek: number,
+    chosenYear: number
+  ) => void;
   currentYear: number;
   currentWeek: number;
 }
@@ -84,7 +89,7 @@ export default function PlanWeekModal({
     try {
       setIsPlanning(true);
 
-      onWeekPlanned(additionalNotes, location);
+      onWeekPlanned(additionalNotes, location, selectedWeek, selectedYear);
       // Reset form
       setAdditionalNotes('');
       setSelectedYear(currentYear);

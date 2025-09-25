@@ -5,7 +5,7 @@ import { Calendar, Sparkles, X, Loader2, MapPin, AlertCircle } from 'lucide-reac
 interface PlanWeekModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onWeekPlanned: (activities: WeekActivityResponse[]) => void;
+  onWeekPlanned: (additionalNotes: string, location: string) => void;
   currentYear: number;
   currentWeek: number;
 }
@@ -75,13 +75,6 @@ export default function PlanWeekModal({
     }
   };
 
-  const getWeekStartDate = (year: number, week: number) => {
-    const jan1 = new Date(year, 0, 1);
-    const days = (week - 1) * 7 - jan1.getDay() + 1;
-    const monday = new Date(year, 0, 1 + days);
-    return monday.toISOString().split('T')[0];
-  };
-
   const handlePlanWeek = async () => {
     // Validate location is provided
     if (!location.trim()) {
@@ -91,24 +84,12 @@ export default function PlanWeekModal({
     try {
       setIsPlanning(true);
 
-      const weekStartDate = getWeekStartDate(selectedYear, selectedWeek);
-
-      const plannedActivities =
-        await WeekActivitiesService.planWeekActivitiesApiV1WeekActivitiesPlanWeekPost({
-          requestBody: {
-            additional_notes: additionalNotes.trim() || null,
-            target_week_start: weekStartDate,
-            location: location.trim(),
-          },
-        });
-
-      onWeekPlanned(plannedActivities);
-      onClose();
-
+      onWeekPlanned(additionalNotes, location);
       // Reset form
       setAdditionalNotes('');
       setSelectedYear(currentYear);
       setSelectedWeek(currentWeek);
+      onClose();
     } catch (error) {
       console.error('Error planning week:', error);
       // You might want to show an error toast here

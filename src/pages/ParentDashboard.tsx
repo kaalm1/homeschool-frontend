@@ -18,6 +18,13 @@ export enum WeekStatus {
   Future = 'future',
 }
 
+const getWeekStartDate = (year: number, week: number) => {
+  const jan1 = new Date(year, 0, 1);
+  const days = (week - 1) * 7 - jan1.getDay() + 1;
+  const monday = new Date(year, 0, 1 + days);
+  return monday.toISOString().split('T')[0];
+};
+
 // Helper function to get ISO week number
 export function getISOWeek(date: Date): number {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -51,6 +58,9 @@ export default function ParentDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>({});
   const [expandedActivities, setExpandedActivities] = useState<Set<number>>(new Set());
+  const [pendingWeekActivities, setPendingWeekActivities] = useState<
+    { id: string; text: string; status: 'loading' | 'error' }[]
+  >([]);
 
   const availableActivities = allActivities.filter((activity) => {
     return activity;
@@ -60,13 +70,80 @@ export default function ParentDashboard() {
 
   const [showPlanWeekModal, setShowPlanWeekModal] = useState(false);
 
-  async function handleWeekPlanned(plannedActivities: WeekActivityResponse[]) {
-    // Refresh the dashboard data to show the new activities
-    await fetchData();
+  async function handleWeekPlanned(additionalNotes: string, location: string) {
+    setShowPlanWeekModal(false);
+    const weekStartDate = getWeekStartDate(selectedYear, selectedWeek);
+
+    // Add phantom cards immediately
+    const newPending = [
+      {
+        id: crypto.randomUUID(),
+        text: 'Planning week...',
+        status: 'loading' as const,
+      },
+    ];
+    setPendingWeekActivities((prev) => [...prev, ...newPending]);
+    try {
+      await WeekActivitiesService.planWeekActivitiesApiV1WeekActivitiesPlanWeekPost({
+        requestBody: {
+          additional_notes: additionalNotes.trim() || null,
+          target_week_start: weekStartDate,
+          location: location.trim(),
+        },
+      });
+
+      // Remove phantom cards on success
+      setPendingWeekActivities((prev) =>
+        prev.filter((p) => !newPending.some((n) => n.id === p.id))
+      );
+      // Refresh the dashboard data to show the new activities
+      await fetchData();
+    } catch (error) {
+      console.error('Error planning week:', error);
+      // You might want to show an error toast here
+      setPendingWeekActivities((prev) =>
+        prev.map((p) => (newPending.some((n) => n.id === p.id) ? { ...p, status: 'error' } : p))
+      );
+    }
 
     // Optional: Show a success message or toast
     // console.log(`Successfully planned ${plannedActivities.length} activities!`);
   }
+
+  const handleRetryWeekActivity = async (activityTitle: string, id: string) => {
+    // Remove previous phantom
+    setPendingWeekActivities((prev) => prev.filter((p) => p.id !== id));
+
+    // Re-add phantom card
+    const tempId = crypto.randomUUID();
+    setPendingWeekActivities((prev) => [
+      ...prev,
+      { id: tempId, text: activityTitle, status: 'loading' },
+    ]);
+
+    try {
+      const activity = allActivities.find((a) => a.title === activityTitle);
+      if (!activity) throw new Error('Activity not found');
+
+      await WeekActivitiesService.createWeekActivityApiV1WeekActivitiesPost({
+        requestBody: {
+          activity_id: activity.id,
+          activity_year: selectedYear,
+          activity_week: selectedWeek,
+        },
+      });
+
+      // Remove phantom on success
+      setPendingWeekActivities((prev) => prev.filter((p) => p.id !== tempId));
+
+      fetchData();
+    } catch (err) {
+      console.error(err);
+      setPendingWeekActivities((prev) =>
+        prev.map((p) => (p.id === tempId ? { ...p, status: 'error' } : p))
+      );
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -321,6 +398,34 @@ export default function ParentDashboard() {
         </div>
 
         <div className="space-y-4">
+          {/* Pending phantom cards */}
+          {pendingWeekActivities.map((activity) => (
+            <div
+              key={activity.id}
+              className="flex flex-col items-center justify-center rounded-2xl border bg-gray-50 p-4 text-gray-700"
+            >
+              {activity.status === 'loading' && (
+                <>
+                  <div className="mb-2 h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+                  <p className="max-w-[200px] truncate text-sm" title={activity.text}>
+                    {activity.text}
+                  </p>
+                </>
+              )}
+
+              {activity.status === 'error' && (
+                <>
+                  <p className="text-sm text-red-600">⚠️ Failed to process “{activity.text}”</p>
+                  <button
+                    onClick={() => handleRetryWeekActivity(activity.text, activity.id)}
+                    className="mt-2 rounded-lg bg-red-100 px-3 py-1 text-sm hover:bg-red-200"
+                  >
+                    Retry
+                  </button>
+                </>
+              )}
+            </div>
+          ))}
           {weekActivities.map((wa) => {
             const isExpanded = expandedActivities.has(wa.id);
             const hasChecklists = !!(

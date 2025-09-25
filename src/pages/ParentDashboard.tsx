@@ -65,7 +65,7 @@ export default function ParentDashboard() {
     await fetchData();
 
     // Optional: Show a success message or toast
-    console.log(`Successfully planned ${plannedActivities.length} activities!`);
+    // console.log(`Successfully planned ${plannedActivities.length} activities!`);
   }
 
   useEffect(() => {

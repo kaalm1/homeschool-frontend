@@ -42,6 +42,7 @@ type FilterValue =
 type PendingActivity = {
   id: string; // temporary UUID
   text: string;
+  fullText: string;
   status: 'loading' | 'error';
 };
 
@@ -220,16 +221,25 @@ export default function ActivitiesBrowser() {
     }
   };
 
+  const truncate = (text: string, max = 50) =>
+    text.length > max ? text.slice(0, max) + '…' : text;
+
   const handleAddActivity = async (newActivityText: string) => {
     setShowAddModal(false);
     if (!newActivityText.trim()) return;
 
     const tempId = crypto.randomUUID();
+    const maxLength = 50;
 
     // insert ghost card
     setPendingActivities((prev) => [
       ...prev,
-      { id: tempId, text: newActivityText, status: 'loading' },
+      {
+        id: tempId,
+        text: newActivityText.slice(0, maxLength) + (newActivityText.length > maxLength ? '…' : ''),
+        fullText: newActivityText,
+        status: 'loading',
+      },
     ]);
 
     try {
@@ -563,13 +573,23 @@ export default function ActivitiesBrowser() {
               {activity.status === 'loading' && (
                 <>
                   <div className="mb-2 h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-                  <p className="text-sm">Processing “{activity.text}”...</p>
+                  <p
+                    className="max-w-[200px] truncate text-sm"
+                    title={activity.fullText} // full text for hover
+                  >
+                    Processing “{activity.text}”...
+                  </p>
                 </>
               )}
 
               {activity.status === 'error' && (
                 <>
-                  <p className="text-sm text-red-600">⚠️ Failed to process “{activity.text}”</p>
+                  <p
+                    className="max-w-[200px] truncate text-sm text-red-600"
+                    title={activity.fullText} // full text on hover
+                  >
+                    ⚠️ Failed to process “{activity.text}”
+                  </p>
                   <button
                     onClick={() => {
                       // remove the failed ghost first

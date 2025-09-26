@@ -61,7 +61,7 @@ interface FamilyProfile {
 
 export default function FamilySettings() {
   const [kids, setKids] = useState<KidResponse[]>([]);
-  const [preferences, setPreferences] = useState<FamilyPreferences>({
+  const defaultPreferences: FamilyPreferences = {
     preferred_themes: [],
     preferred_activity_types: [],
     available_days: [],
@@ -69,14 +69,19 @@ export default function FamilySettings() {
     group_activity_comfort: undefined,
     new_experience_openness: undefined,
     educational_priorities: [],
-  });
+  };
+  const [preferences, setPreferences] = useState<FamilyPreferences>(defaultPreferences);
+  const [initialPreferences, setInitialPreferences] =
+    useState<FamilyPreferences>(defaultPreferences);
 
-  const [familyProfile, setFamilyProfile] = useState<UserUpdate>({
+  const defaultProfile: UserUpdate = {
     address: '',
     family_size: 1,
     max_activities_per_week: 10,
     has_car: true,
-  });
+  };
+  const [familyProfile, setFamilyProfile] = useState<UserUpdate>(defaultProfile);
+  const [initialProfile, setInitialProfile] = useState<UserUpdate>(defaultProfile);
 
   const [activeTab, setActiveTab] = useState('profile');
   const [saving, setSaving] = useState(false);
@@ -127,10 +132,25 @@ export default function FamilySettings() {
             new_experience_openness: preferencesResponse.new_experience_openness || undefined,
             educational_priorities: preferencesResponse.educational_priorities || [],
           });
+          setInitialPreferences({
+            preferred_themes: preferencesResponse.preferred_themes || [],
+            preferred_activity_types: preferencesResponse.preferred_activity_types || [],
+            available_days: preferencesResponse.available_days || [],
+            preferred_time_slots: preferencesResponse.preferred_time_slots || [],
+            group_activity_comfort: preferencesResponse.group_activity_comfort || undefined,
+            new_experience_openness: preferencesResponse.new_experience_openness || undefined,
+            educational_priorities: preferencesResponse.educational_priorities || [],
+          });
         }
-        console.log(usersResponse);
         if (usersResponse) {
           setFamilyProfile({
+            address: usersResponse.address || '',
+            zipcode: usersResponse.zipcode || '',
+            family_size: usersResponse.family_size || 1,
+            max_activities_per_week: usersResponse.max_activities_per_week || 10,
+            has_car: usersResponse.has_car ?? true,
+          });
+          setInitialProfile({
             address: usersResponse.address || '',
             zipcode: usersResponse.zipcode || '',
             family_size: usersResponse.family_size || 1,
@@ -587,6 +607,9 @@ export default function FamilySettings() {
     return null;
   }
 
+  const hasChanges = JSON.stringify(familyProfile) !== JSON.stringify(initialProfile);
+  const preferencesChanged = JSON.stringify(preferences) !== JSON.stringify(initialPreferences);
+  const canSave = hasChanges || preferencesChanged;
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -604,8 +627,12 @@ export default function FamilySettings() {
             </div>
             <button
               onClick={handleSave}
-              disabled={saving}
-              className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:bg-blue-400"
+              disabled={canSave || saving}
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-white transition-colors ${
+                !canSave || saving
+                  ? 'cursor-not-allowed bg-gray-300'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`}
             >
               <Save className="h-4 w-4" />
               {saving ? 'Saving...' : 'Save Changes'}

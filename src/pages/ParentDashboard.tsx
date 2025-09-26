@@ -233,17 +233,15 @@ export default function ParentDashboard() {
     }
   }
 
-  async function removeActivityFromWeek(kidId: number | null, activityId: number) {
+  async function removeActivityFromWeek(kidId: number | null, weekActivityId: number) {
     try {
-      await WeekActivitiesService.removeActivityFromWeekApiV1WeekActivitiesRemoveDelete({
-        activityId,
-        year: selectedYear,
-        week: selectedWeek,
+      await WeekActivitiesService.deleteWeekActivityApiV1WeekActivitiesWeekActivityIdDelete({
+        weekActivityId,
       });
 
       // Remove from local state
       setWeekActivities((prev) =>
-        prev.filter((wa) => !(wa.user_id === kidId && wa.activity_id === activityId))
+        prev.filter((wa) => !(wa.user_id === kidId && wa.id === weekActivityId))
       );
       fetchData(); // Refresh summary
     } catch (err) {
@@ -485,7 +483,7 @@ export default function ParentDashboard() {
                         )}
                       </button>
                       <button
-                        onClick={() => removeActivityFromWeek(null, wa.activity_id)} // Use null for family activities
+                        onClick={() => removeActivityFromWeek(null, wa.id)}
                         className="text-red-500 hover:text-red-700"
                         title="Remove from week"
                       >

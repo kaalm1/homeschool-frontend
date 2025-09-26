@@ -17,6 +17,7 @@ import {
   Trash2,
   Check,
   Home,
+  Car,
 } from 'lucide-react';
 import {
   SettingsService,
@@ -670,21 +671,37 @@ export default function FamilySettings() {
           </nav>
         </div>
 
-        {/* Family Profile Tab */}
+        {/* Family Profile Content */}
         {activeTab === 'profile' && (
-          <div className="space-y-6">
-            <div className="rounded-lg border bg-white p-6 shadow-sm">
-              <div className="mb-6 flex items-center gap-2">
-                <Home className="h-5 w-5 text-blue-600" />
-                <h2 className="text-xl font-semibold">Family Profile</h2>
+          <div className="space-y-8">
+            {/* Profile Header Card */}
+            <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+              <div className="mb-8 flex items-center gap-3">
+                <div className="rounded-xl bg-indigo-100 p-3">
+                  <Home className="h-6 w-6 text-indigo-600" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Family Profile</h2>
+                  <p className="text-gray-600">
+                    Set up your family's basic information and preferences
+                  </p>
+                </div>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-2">
-                <LocationInput familyProfile={familyProfile} setFamilyProfile={setFamilyProfile} />
+              {/* Form Grid */}
+              <div className="grid gap-8 lg:grid-cols-2">
+                {/* Location Section */}
+                <div className="lg:col-span-2">
+                  <LocationInput
+                    familyProfile={familyProfile}
+                    setFamilyProfile={setFamilyProfile}
+                  />
+                </div>
 
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    <Users className="mr-2 inline h-4 w-4" />
+                {/* Family Size */}
+                <div className="space-y-3">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-800">
+                    <Users className="h-4 w-4 text-indigo-600" />
                     Family Size
                   </label>
                   <select
@@ -695,7 +712,7 @@ export default function FamilySettings() {
                         family_size: parseInt(e.target.value),
                       }))
                     }
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                    className="w-full cursor-pointer appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 transition-all duration-200 outline-none focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200"
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((size) => (
                       <option key={size} value={size}>
@@ -703,10 +720,79 @@ export default function FamilySettings() {
                       </option>
                     ))}
                   </select>
-                  <p className="mt-1 text-sm text-gray-500">
+                  <p className="text-sm text-gray-600">
                     Total number of family members who might participate
                   </p>
                 </div>
+
+                {/* Max Activities Per Week */}
+                <div className="space-y-3">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-800">
+                    <Calendar className="h-4 w-4 text-indigo-600" />
+                    Max Activities Per Week
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min={1}
+                      max={50}
+                      value={familyProfile.max_activities_per_week || ''}
+                      onChange={(e) =>
+                        setFamilyProfile((prev) => ({
+                          ...prev,
+                          max_activities_per_week: parseInt(e.target.value),
+                        }))
+                      }
+                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 transition-all duration-200 outline-none focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200"
+                    />
+                    <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center">
+                      <span className="text-sm text-gray-400">per week</span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Maximum number of activities your family can participate in per week
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Transportation Card */}
+            <div className="rounded-2xl border border-gray-200 bg-white p-8 shadow-sm">
+              <div className="mb-6 flex items-center gap-3">
+                <div className="rounded-xl bg-emerald-100 p-3">
+                  <Car className="h-6 w-6 text-emerald-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">Transportation</h3>
+                  <p className="text-gray-600">Let us know about your transportation options</p>
+                </div>
+              </div>
+
+              {/* Has Car Toggle */}
+              <div className="flex items-center justify-between rounded-xl bg-gray-50 p-6">
+                <div className="flex items-center gap-4">
+                  <div className="rounded-lg bg-white p-2">
+                    <Car className="h-5 w-5 text-gray-600" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Has Car</h4>
+                    <p className="text-sm text-gray-600">I have access to a car for activities</p>
+                  </div>
+                </div>
+                <label className="relative inline-flex cursor-pointer items-center">
+                  <input
+                    type="checkbox"
+                    checked={familyProfile.has_car}
+                    onChange={(e) =>
+                      setFamilyProfile((prev) => ({
+                        ...prev,
+                        has_car: e.target.checked,
+                      }))
+                    }
+                    className="peer sr-only"
+                  />
+                  <div className="peer relative h-6 w-11 rounded-full bg-gray-200 peer-checked:bg-indigo-600 peer-focus:ring-4 peer-focus:ring-indigo-300 peer-focus:outline-none after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
+                </label>
               </div>
             </div>
           </div>

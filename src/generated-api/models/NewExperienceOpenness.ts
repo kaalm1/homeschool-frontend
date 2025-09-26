@@ -3,9 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 export enum NewExperienceOpenness {
-  VERY_CONSERVATIVE = 'very-conservative',
-  CONSERVATIVE = 'conservative',
-  MODERATE = 'moderate',
-  ADVENTUROUS = 'adventurous',
-  VERY_ADVENTUROUS = 'very-adventurous',
+    VERY_CONSERVATIVE = 'very-conservative',
+    CONSERVATIVE = 'conservative',
+    MODERATE = 'moderate',
+    ADVENTUROUS = 'adventurous',
+    VERY_ADVENTUROUS = 'very-adventurous',
 }

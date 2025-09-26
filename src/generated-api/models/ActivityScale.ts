@@ -3,8 +3,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export enum ActivityScale {
-  SMALL = 'small',
-  MEDIUM = 'medium',
-  LARGE = 'large',
-  EXTRA_LARGE = 'extra_large',
+    SMALL = 'small',
+    MEDIUM = 'medium',
+    LARGE = 'large',
+    EXTRA_LARGE = 'extra_large',
 }

@@ -3,10 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 export type PlanWeekActivityRequest = {
-  location: string;
-  additional_notes?: string | null;
-  /**
-   * Start date of the week to plan (defaults to current week Monday)
-   */
-  target_week_start?: string | null;
+    location: string;
+    additional_notes?: (string | null);
+    /**
+     * Start date of the week to plan (defaults to current week Monday)
+     */
+    target_week_start?: (string | null);
 };
+

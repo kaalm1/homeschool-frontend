@@ -6,6 +6,7 @@
  * Google auth request model.
  */
 export type GoogleAuthRequest = {
-  code: string;
-  state?: string | null;
+    code: string;
+    state?: (string | null);
 };
+

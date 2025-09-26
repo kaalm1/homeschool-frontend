@@ -6,6 +6,7 @@
  * Standard structure for enum options.
  */
 export type EnumOption = {
-  value: string;
-  label: string;
+    value: string;
+    label: string;
 };
+

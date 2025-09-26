@@ -4,6 +4,7 @@
 /* eslint-disable */
 import type { ActivityResponse } from './ActivityResponse';
 export type ActivityTaggingResponse = {
-  tagged_activities: Array<ActivityResponse>;
-  total_count: number;
+    tagged_activities: Array<ActivityResponse>;
+    total_count: number;
 };
+

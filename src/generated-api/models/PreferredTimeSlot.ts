@@ -3,7 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export enum PreferredTimeSlot {
-  MORNING = 'morning',
-  AFTERNOON = 'afternoon',
-  EVENING = 'evening',
+    MORNING = 'morning',
+    AFTERNOON = 'afternoon',
+    EVENING = 'evening',
 }

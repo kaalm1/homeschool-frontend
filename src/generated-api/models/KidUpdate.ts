@@ -6,15 +6,16 @@
  * Kid update model.
  */
 export type KidUpdate = {
-  /**
-   * Kid's name
-   */
-  name: string;
-  /**
-   * Kid's color (hex)
-   */
-  color?: string;
-  dob?: string | null;
-  interests?: Array<string>;
-  special_needs?: Array<string>;
+    /**
+     * Kid's name
+     */
+    name: string;
+    /**
+     * Kid's color (hex)
+     */
+    color?: string;
+    dob?: (string | null);
+    interests?: Array<string>;
+    special_needs?: Array<string>;
 };
+

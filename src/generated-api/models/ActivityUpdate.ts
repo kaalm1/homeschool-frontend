@@ -13,68 +13,69 @@ import type { Participants } from './Participants';
 import type { Season } from './Season';
 import type { Theme } from './Theme';
 export type ActivityUpdate = {
-  /**
-   * Activity title
-   */
-  title?: string | null;
-  /**
-   * Activity description
-   */
-  description?: string | null;
-  /**
-   * Activity completion status
-   */
-  done?: boolean | null;
-  /**
-   * Activity costs
-   */
-  costs?: Array<Cost> | null;
-  /**
-   * Activity durations
-   */
-  durations?: Array<Duration> | null;
-  /**
-   * Activity participants
-   */
-  participants?: Array<Participants> | null;
-  /**
-   * Activity locations
-   */
-  locations?: Array<Location> | null;
-  /**
-   * Activity seasons
-   */
-  seasons?: Array<Season> | null;
-  /**
-   * Activity age groups
-   */
-  age_groups?: Array<AgeGroup> | null;
-  /**
-   * Activity frequency
-   */
-  frequency?: Array<Frequency> | null;
-  /**
-   * Theme IDs
-   */
-  themes?: Array<Theme> | null;
-  /**
-   * ActivityType IDs
-   */
-  activity_types?: Array<ActivityType> | null;
-  /**
-   * Activity scale
-   */
-  activity_scale?: ActivityScale | null;
-  /**
-   * Activity equipment
-   */
-  equipment?: Array<string> | null;
-  /**
-   * Activity instructions
-   */
-  instructions?: Array<string> | null;
-  /**
-   * Activity adhd tips
-   */
-  adhd_tips?: Array<string> | null;
+    /**
+     * Activity title
+     */
+    title?: (string | null);
+    /**
+     * Activity description
+     */
+    description?: (string | null);
+    /**
+     * Activity completion status
+     */
+    done?: (boolean | null);
+    /**
+     * Activity costs
+     */
+    costs?: (Array<Cost> | null);
+    /**
+     * Activity durations
+     */
+    durations?: (Array<Duration> | null);
+    /**
+     * Activity participants
+     */
+    participants?: (Array<Participants> | null);
+    /**
+     * Activity locations
+     */
+    locations?: (Array<Location> | null);
+    /**
+     * Activity seasons
+     */
+    seasons?: (Array<Season> | null);
+    /**
+     * Activity age groups
+     */
+    age_groups?: (Array<AgeGroup> | null);
+    /**
+     * Activity frequency
+     */
+    frequency?: (Array<Frequency> | null);
+    /**
+     * Theme IDs
+     */
+    themes?: (Array<Theme> | null);
+    /**
+     * ActivityType IDs
+     */
+    activity_types?: (Array<ActivityType> | null);
+    /**
+     * Activity scale
+     */
+    activity_scale?: (ActivityScale | null);
+    /**
+     * Activity equipment
+     */
+    equipment?: (Array<string> | null);
+    /**
+     * Activity instructions
+     */
+    instructions?: (Array<string> | null);
+    /**
+     * Activity adhd tips
+     */
+    adhd_tips?: (Array<string> | null);
 };
+

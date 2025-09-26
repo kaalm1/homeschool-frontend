@@ -782,7 +782,7 @@ export default function FamilySettings() {
                 <label className="relative inline-flex cursor-pointer items-center">
                   <input
                     type="checkbox"
-                    checked={familyProfile.has_car}
+                    checked={!!familyProfile.has_car}
                     onChange={(e) =>
                       setFamilyProfile((prev) => ({
                         ...prev,

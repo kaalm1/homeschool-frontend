@@ -716,7 +716,7 @@ export default function FamilySettings() {
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((size) => (
                       <option key={size} value={size}>
-                        {size} {size === 1 ? 'person' : 'people'}
+                        {size === 10 ? '10+ people' : `${size} ${size === 1 ? 'person' : 'people'}`}
                       </option>
                     ))}
                   </select>
@@ -731,24 +731,24 @@ export default function FamilySettings() {
                     <Calendar className="h-4 w-4 text-indigo-600" />
                     Max Activities Per Week
                   </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      min={1}
-                      max={50}
-                      value={familyProfile.max_activities_per_week || ''}
-                      onChange={(e) =>
-                        setFamilyProfile((prev) => ({
-                          ...prev,
-                          max_activities_per_week: parseInt(e.target.value),
-                        }))
-                      }
-                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 transition-all duration-200 outline-none focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200"
-                    />
-                    <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center">
-                      <span className="text-sm text-gray-400">per week</span>
-                    </div>
-                  </div>
+                  <select
+                    value={familyProfile.max_activities_per_week || 1}
+                    onChange={(e) =>
+                      setFamilyProfile((prev) => ({
+                        ...prev,
+                        max_activities_per_week: parseInt(e.target.value),
+                      }))
+                    }
+                    className="w-full cursor-pointer appearance-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 transition-all duration-200 outline-none focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-200"
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                      <option key={num} value={num}>
+                        {num === 10
+                          ? '10+ activities'
+                          : `${num} ${num === 1 ? 'activity' : 'activities'}`}
+                      </option>
+                    ))}
+                  </select>
                   <p className="text-sm text-gray-600">
                     Maximum number of activities your family can participate in per week
                   </p>

@@ -73,9 +73,11 @@ export default function FamilySettings() {
   const [familyProfile, setFamilyProfile] = useState<UserUpdate>({
     address: '',
     family_size: 1,
+    max_activities_per_week: 10,
+    has_car: true,
   });
 
-  const [activeTab, setActiveTab] = useState('kids');
+  const [activeTab, setActiveTab] = useState('profile');
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -125,11 +127,14 @@ export default function FamilySettings() {
             educational_priorities: preferencesResponse.educational_priorities || [],
           });
         }
+        console.log(usersResponse);
         if (usersResponse) {
           setFamilyProfile({
             address: usersResponse.address || '',
             zipcode: usersResponse.zipcode || '',
             family_size: usersResponse.family_size || 1,
+            max_activities_per_week: usersResponse.max_activities_per_week || 10,
+            has_car: usersResponse.has_car ?? true,
           });
         }
       } catch (err) {
@@ -179,6 +184,8 @@ export default function FamilySettings() {
         latitude: familyProfile.latitude,
         longitude: familyProfile.longitude,
         family_size: familyProfile.family_size,
+        has_car: familyProfile.has_car,
+        max_activities_per_week: familyProfile.max_activities_per_week,
       };
       await UsersService.updateCurrentUserProfileApiV1UserProfilePatch({
         requestBody: profileUpdate,

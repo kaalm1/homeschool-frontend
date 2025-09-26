@@ -1,7 +1,7 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * User response model.
  */
@@ -32,4 +32,9 @@ export type UserResponse = {
    * User family size
    */
   family_size?: number | null;
+  max_activities_per_week: number | null;
+  /**
+   * User has car
+   */
+  has_car: boolean | null;
 };

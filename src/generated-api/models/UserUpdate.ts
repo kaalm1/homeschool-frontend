@@ -1,7 +1,7 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * User update model.
  */
@@ -42,4 +42,9 @@ export type UserUpdate = {
    * User state
    */
   state?: string | null;
+  max_activities_per_week: number | null;
+  /**
+   * User has car
+   */
+  has_car: boolean;
 };

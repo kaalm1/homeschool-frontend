@@ -1,7 +1,7 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
-
+/* eslint-disable */
 export enum ActivityType {
   AMUSEMENT_PARK = 'amusement_park',
   ARTS_CRAFTS = 'arts_crafts',

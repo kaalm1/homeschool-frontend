@@ -1,7 +1,7 @@
 /* generated using openapi-typescript-codegen -- do not edit */
 /* istanbul ignore file */
 /* tslint:disable */
-
+/* eslint-disable */
 import type { UserResponse } from '../models/UserResponse';
 import type { UserUpdate } from '../models/UserUpdate';
 import type { CancelablePromise } from '../core/CancelablePromise';

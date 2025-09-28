@@ -152,9 +152,6 @@ export default function Login() {
     <div className="grid min-h-screen place-items-center p-4">
       <div className="w-full max-w-sm space-y-4 rounded-lg bg-white p-6 shadow-md">
         <h1 className="text-center text-2xl font-bold">Homeschool Helper</h1>
-        <p className="text-center text-sm text-slate-500">
-          Demo login is prefilled. Backend must be running.
-        </p>
 
         {/* Google Login Button */}
         <button

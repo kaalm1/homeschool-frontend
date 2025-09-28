@@ -43,6 +43,7 @@ import type {
 import { Toaster, toast } from 'sonner';
 import LocationInput from '@/components/LocationInput';
 import AccountSettings from '@/components/FamilySettings/AccountSettings';
+import { useFamilyData } from '@/hooks/useFamilyData';
 
 interface FamilyPreferences {
   preferred_themes: Theme[];
@@ -607,9 +608,17 @@ export default function FamilySettings() {
     return null;
   }
 
-  const hasChanges = JSON.stringify(familyProfile) !== JSON.stringify(initialProfile);
-  const preferencesChanged = JSON.stringify(preferences) !== JSON.stringify(initialPreferences);
-  const canSave = hasChanges || preferencesChanged;
+  const canSave = useMemo(() => {
+    const hasChanges = JSON.stringify(familyProfile) !== JSON.stringify(initialProfile);
+    const preferencesChanged = JSON.stringify(preferences) !== JSON.stringify(initialPreferences);
+    return hasChanges || preferencesChanged;
+  }, [familyProfile, initialProfile, preferences, initialPreferences]);
+
+  const kidCards = useMemo(
+    () => kids.map((kid) => <KidCard key={kid.id} kid={kid} />),
+    [kids, editingKid]
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -920,9 +929,7 @@ export default function FamilySettings() {
               )}
 
               <div className="grid gap-6 md:grid-cols-2">
-                {kids.map((kid) => (
-                  <KidCard key={kid.id} kid={kid} />
-                ))}
+                {kidCards}
                 {kids.length === 0 && !addingKid && (
                   <div className="col-span-2 py-8 text-center text-gray-500">
                     No kids added yet. Click "Add Kid" to get started!

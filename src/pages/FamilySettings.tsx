@@ -47,7 +47,6 @@ import { useFamilyData } from '@/hooks/useFamilyData';
 import isEqual from 'lodash.isequal';
 import { useQueryClient } from '@tanstack/react-query';
 
-
 interface FamilyPreferences {
   preferred_themes: Theme[];
   preferred_activity_types: ActivityType[];

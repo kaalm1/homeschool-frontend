@@ -384,6 +384,11 @@ export default function ParentDashboard() {
             {weekStatus !== WeekStatus.Past && (
               <button
                 onClick={() => setShowPlanWeekModal(true)}
+                title={
+                  weekActivities.length >= (usersResponse?.max_activities_per_week ?? 10)
+                    ? `You have reached the maximum activities for this week (${usersResponse?.max_activities_per_week}). Update your settings to allow more.`
+                    : undefined
+                }
                 disabled={weekActivities.length >= (usersResponse?.max_activities_per_week ?? 10)}
                 className={`flex items-center rounded-md px-4 py-2 shadow-sm transition-all duration-200 ${
                   weekActivities.length >= (usersResponse?.max_activities_per_week ?? 10)

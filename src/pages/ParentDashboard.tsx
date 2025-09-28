@@ -11,6 +11,7 @@ import { Star, CheckSquare, Sparkles, Square, Trash2, ChevronDown, ChevronUp } f
 import ActivitySelector from '@/components/ParentDashboard/ActivitySelector';
 import PlanWeekModal from '@/components/ParentDashboard/PlanWeekModal';
 import ActivityChecklistManager from '@/components/ParentDashboard/ActivityChecklistManager';
+import { useFamilyData } from '@/hooks/useFamilyData';
 
 export enum WeekStatus {
   Past = 'past',
@@ -69,6 +70,8 @@ export default function ParentDashboard() {
   const filteredActivities = useActivityFiltering(availableActivities, searchTerm, selectedFilters);
 
   const [showPlanWeekModal, setShowPlanWeekModal] = useState(false);
+
+  const { userProfile: usersResponse } = useFamilyData();
 
   async function handleWeekPlanned(
     additionalNotes: string,
@@ -378,10 +381,15 @@ export default function ParentDashboard() {
           <h3 className="text-xl font-semibold">Family Activities</h3>
           <div className="flex space-x-3">
             {/* Plan Week Button */}
-            {weekStatus != WeekStatus.Past && (
+            {weekStatus !== WeekStatus.Past && (
               <button
                 onClick={() => setShowPlanWeekModal(true)}
-                className="flex items-center rounded-md bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 text-white shadow-sm transition-all duration-200 hover:from-purple-600 hover:to-pink-600 hover:shadow-md"
+                disabled={weekActivities.length >= (usersResponse?.max_activities_per_week ?? 10)}
+                className={`flex items-center rounded-md px-4 py-2 shadow-sm transition-all duration-200 ${
+                  weekActivities.length >= (usersResponse?.max_activities_per_week ?? 10)
+                    ? 'cursor-not-allowed bg-gray-300 text-gray-600'
+                    : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 hover:shadow-md'
+                }`}
               >
                 <Sparkles className="mr-2 h-4 w-4" />
                 Plan Week

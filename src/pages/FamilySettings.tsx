@@ -45,6 +45,8 @@ import LocationInput from '@/components/LocationInput';
 import AccountSettings from '@/components/FamilySettings/AccountSettings';
 import { useFamilyData } from '@/hooks/useFamilyData';
 import isEqual from 'lodash.isequal';
+import { useQueryClient } from '@tanstack/react-query';
+
 
 interface FamilyPreferences {
   preferred_themes: Theme[];
@@ -103,6 +105,7 @@ export default function FamilySettings() {
     special_needs: [],
     color: '#a7f3d0',
   });
+  const queryClient = useQueryClient();
 
   const {
     settings: settingsResponse,
@@ -210,6 +213,10 @@ export default function FamilySettings() {
       await UsersService.updateCurrentUserProfileApiV1UserProfilePatch({
         requestBody: profileUpdate,
       });
+
+      // ✅ Invalidate queries to refetch fresh data
+      queryClient.invalidateQueries({ queryKey: ['preferences'] });
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
 
       toast.success('Settings saved successfully!');
     } catch (err) {

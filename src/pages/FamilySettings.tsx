@@ -44,6 +44,7 @@ import { Toaster, toast } from 'sonner';
 import LocationInput from '@/components/LocationInput';
 import AccountSettings from '@/components/FamilySettings/AccountSettings';
 import { useFamilyData } from '@/hooks/useFamilyData';
+import isEqual from 'lodash.isequal';
 
 interface FamilyPreferences {
   preferred_themes: Theme[];
@@ -90,7 +91,7 @@ export default function FamilySettings() {
   const [error, setError] = useState<string | null>(null);
 
   // API response data
-  const [settingsOptions, setSettingsOptions] = useState<AllSettingsResponse | null>(null);
+  const [settingsOptions, setSettingsOptions] = useState<AllSettingsResponse>();
 
   // Edit states
   const [editingKid, setEditingKid] = useState<number | null>(null);
@@ -103,6 +104,13 @@ export default function FamilySettings() {
     color: '#a7f3d0',
   });
 
+  const {
+    settings: settingsResponse,
+    preferences: preferencesResponse,
+    kids: kidsResponse,
+    userProfile: usersResponse,
+  } = useFamilyData();
+
   // Load data on component mount
   useEffect(() => {
     const loadData = async () => {
@@ -110,18 +118,8 @@ export default function FamilySettings() {
         setLoading(true);
         setError(null);
 
-        // Load settings options, preferences, and kids in parallel
-        const [settingsResponse, preferencesResponse, kidsResponse, usersResponse] =
-          await Promise.all([
-            SettingsService.getAllSettingsApiV1SettingsSettingsAllGet(),
-            FamilyPreferencesService.getFamilyPreferencesApiV1FamilyPreferencesApiV1FamilyPreferencesGet().catch(
-              () => null
-            ),
-            KidsService.getKidsApiV1KidsGet().catch(() => []),
-            UsersService.getUserProfileApiV1UserProfileGet().catch(() => null),
-          ]);
         setSettingsOptions(settingsResponse);
-        setKids(kidsResponse);
+        setKids(kidsResponse ?? []);
 
         if (preferencesResponse) {
           setPreferences({
@@ -168,7 +166,7 @@ export default function FamilySettings() {
     };
 
     loadData();
-  }, []);
+  }, [settingsResponse, preferencesResponse, kidsResponse, usersResponse]);
 
   const calculateAge = (dateOfBirth: string): number => {
     const today = new Date();
@@ -545,6 +543,17 @@ export default function FamilySettings() {
     );
   };
 
+  const canSave = useMemo(() => {
+    const hasProfileChanges = !isEqual(familyProfile, initialProfile);
+    const hasPreferencesChanges = !isEqual(preferences, initialPreferences);
+    return hasProfileChanges || hasPreferencesChanges;
+  }, [familyProfile, initialProfile, preferences, initialPreferences]);
+
+  const kidCards = useMemo(
+    () => kids.map((kid) => <KidCard key={kid.id} kid={kid} />),
+    [kids, editingKid]
+  );
+
   // Loading state
   if (loading) {
     return (
@@ -608,17 +617,6 @@ export default function FamilySettings() {
     return null;
   }
 
-  const canSave = useMemo(() => {
-    const hasChanges = JSON.stringify(familyProfile) !== JSON.stringify(initialProfile);
-    const preferencesChanged = JSON.stringify(preferences) !== JSON.stringify(initialPreferences);
-    return hasChanges || preferencesChanged;
-  }, [familyProfile, initialProfile, preferences, initialPreferences]);
-
-  const kidCards = useMemo(
-    () => kids.map((kid) => <KidCard key={kid.id} kid={kid} />),
-    [kids, editingKid]
-  );
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -636,7 +634,7 @@ export default function FamilySettings() {
             </div>
             <button
               onClick={handleSave}
-              disabled={canSave || saving}
+              disabled={!canSave || saving}
               className={`flex items-center gap-2 rounded-lg px-4 py-2 text-white transition-colors ${
                 !canSave || saving
                   ? 'cursor-not-allowed bg-gray-300'

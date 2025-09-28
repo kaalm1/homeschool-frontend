@@ -24,23 +24,23 @@ export function useFamilyData(): FamilyDataResult {
     queries: [
       {
         queryKey: ['settings'],
-        queryFn: () => SettingsService.getAllSettingsApiV1SettingsSettingsAllGet(),
+        queryFn: () =>
+          SettingsService.getAllSettingsApiV1SettingsSettingsAllGet().catch(() => undefined),
       },
       {
         queryKey: ['preferences'],
         queryFn: () =>
-          FamilyPreferencesService.getFamilyPreferencesApiV1FamilyPreferencesApiV1FamilyPreferencesGet(),
-        retry: false,
+          FamilyPreferencesService.getFamilyPreferencesApiV1FamilyPreferencesApiV1FamilyPreferencesGet().catch(
+            () => undefined
+          ),
       },
       {
         queryKey: ['kids'],
-        queryFn: () => KidsService.getKidsApiV1KidsGet(),
-        retry: false,
+        queryFn: () => KidsService.getKidsApiV1KidsGet().catch(() => []),
       },
       {
         queryKey: ['userProfile'],
-        queryFn: () => UsersService.getUserProfileApiV1UserProfileGet(),
-        retry: false,
+        queryFn: () => UsersService.getUserProfileApiV1UserProfileGet().catch(() => undefined),
       },
     ],
   });

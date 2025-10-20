@@ -165,7 +165,7 @@ export default function PersonalItemsDashboard() {
   };
 
   const activeTodos = todos.filter((t) => t.status !== 'completed');
-  const activeShopping = shopping.filter((s) => s.status !== 'pending');
+  const activeShopping = shopping.filter((s) => s.status !== 'completed');
   const upcomingEvents = calendar.filter((c) => c.status !== 'completed');
 
   return (

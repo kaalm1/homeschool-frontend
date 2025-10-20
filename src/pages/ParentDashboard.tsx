@@ -11,6 +11,7 @@ import { Star, CheckSquare, Sparkles, Square, Trash2, ChevronDown, ChevronUp } f
 import ActivitySelector from '@/components/ParentDashboard/ActivitySelector';
 import PlanWeekModal from '@/components/ParentDashboard/PlanWeekModal';
 import ActivityChecklistManager from '@/components/ParentDashboard/ActivityChecklistManager';
+import QuickAddWidget from '@/components/ParentDashboard/QuickAddWidget';
 import { useFamilyData } from '@/hooks/useFamilyData';
 
 export enum WeekStatus {
@@ -301,6 +302,12 @@ export default function ParentDashboard() {
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Weekly Activities Dashboard</h1>
         <div className="flex items-center space-x-3">
+          <Link
+            to="/personal"
+            className="rounded-full bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-200"
+          >
+            Personal Items
+          </Link>
           <Link
             to="/activities"
             className="rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-200"
@@ -608,6 +615,8 @@ export default function ParentDashboard() {
           onSearchChange={setSearchTerm}
         />
       )}
+
+      <QuickAddWidget />
     </div>
   );
 }

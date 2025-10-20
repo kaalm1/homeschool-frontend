@@ -4,6 +4,7 @@ import ParentDashboard from '@/pages/ParentDashboard';
 import KidDashboard from '@/pages/KidDashboard';
 import ActivitiesBrowser from '@/pages/ActivitiesBrowser';
 import FamilySettings from '@/pages/FamilySettings';
+import PersonalItemsDashboard from '@/pages/PersonalItemsDashboard';
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
       <Route path="/kid/:kidId" element={<KidDashboard />} />
       <Route path="/activities" element={<ActivitiesBrowser />} />
       <Route path="/settings" element={<FamilySettings />} />
+      <Route path="/personal" element={<PersonalItemsDashboard />} />
     </Routes>
   );
 }

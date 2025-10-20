@@ -11,7 +11,6 @@ import { Star, CheckSquare, Sparkles, Square, Trash2, ChevronDown, ChevronUp } f
 import ActivitySelector from '@/components/ParentDashboard/ActivitySelector';
 import PlanWeekModal from '@/components/ParentDashboard/PlanWeekModal';
 import ActivityChecklistManager from '@/components/ParentDashboard/ActivityChecklistManager';
-import QuickAddWidget from '@/components/ParentDashboard/QuickAddWidget';
 import { useFamilyData } from '@/hooks/useFamilyData';
 
 export enum WeekStatus {
@@ -615,8 +614,6 @@ export default function ParentDashboard() {
           onSearchChange={setSearchTerm}
         />
       )}
-
-      <QuickAddWidget />
     </div>
   );
 }

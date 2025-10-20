@@ -21,6 +21,7 @@ import {
   type ShoppingResponse,
   type CalendarResponse,
 } from '@/generated-api';
+import QuickAddWidget from '@/components/PersonalItemsDashboard/QuickAddWidget';
 
 type AddMode = 'ai' | 'todo' | 'shopping' | 'calendar' | null;
 type ViewTab = 'todos' | 'shopping' | 'calendar';
@@ -198,13 +199,6 @@ export default function PersonalItemsDashboard() {
             >
               Settings
             </Link>
-            <button
-              onClick={() => setShowQuickAdd(true)}
-              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
-            >
-              <Plus className="h-5 w-5" />
-              Quick Add
-            </button>
           </div>
         </div>
 
@@ -779,6 +773,7 @@ export default function PersonalItemsDashboard() {
           </div>
         </div>
       )}
+      <QuickAddWidget />
     </div>
   );
 }

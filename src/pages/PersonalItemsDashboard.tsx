@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  ArrowLeft,
   Sparkles,
   CheckSquare,
   ShoppingCart,
@@ -9,10 +8,11 @@ import {
   X,
   Loader2,
   Trash2,
-  Edit2,
   Check,
   Plus,
-  Filter,
+  ArrowLeft,
+  Search,
+  History,
 } from 'lucide-react';
 import {
   ItemsService,
@@ -21,20 +21,25 @@ import {
   type ShoppingResponse,
   type CalendarResponse,
 } from '@/generated-api';
-import QuickAddWidget from '@/components/PersonalItemsDashboard/QuickAddWidget';
 
 type AddMode = 'ai' | 'todo' | 'shopping' | 'calendar' | null;
 type ViewTab = 'todos' | 'shopping' | 'calendar';
+type ViewMode = 'active' | 'history';
 
 export default function PersonalItemsDashboard() {
   const [activeTab, setActiveTab] = useState<ViewTab>('todos');
+  const [viewMode, setViewMode] = useState<ViewMode>('active');
   const [showQuickAdd, setShowQuickAdd] = useState<boolean>(false);
   const [mode, setMode] = useState<AddMode>(null);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   // Data states
   const [todos, setTodos] = useState<TodoResponse[]>([]);
   const [shopping, setShopping] = useState<ShoppingResponse[]>([]);
   const [calendar, setCalendar] = useState<CalendarResponse[]>([]);
+  const [completedTodos, setCompletedTodos] = useState<TodoResponse[]>([]);
+  const [purchasedShopping, setPurchasedShopping] = useState<ShoppingResponse[]>([]);
+  const [pastEvents, setPastEvents] = useState<CalendarResponse[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Quick Add states
@@ -62,11 +67,19 @@ export default function PersonalItemsDashboard() {
       const [todosData, shoppingData, calendarData] = await Promise.all([
         ItemsService.getTodosApiV1ItemsTodosGet({ statusFilter: null, priority: null }),
         ItemsService.getShoppingApiV1ItemsShoppingGet({ statusFilter: null, category: null }),
-        ItemsService.getCalendarEventsApiV1ItemsCalendarGet({ upcomingOnly: true }),
+        ItemsService.getCalendarEventsApiV1ItemsCalendarGet({ upcomingOnly: false }),
       ]);
-      setTodos(todosData);
-      setShopping(shoppingData);
-      setCalendar(calendarData);
+
+      // Separate active and completed items
+      setTodos(todosData.filter((t) => t.status !== 'completed'));
+      setCompletedTodos(todosData.filter((t) => t.status === 'completed'));
+
+      setShopping(shoppingData.filter((s) => s.status !== 'completed'));
+      setPurchasedShopping(shoppingData.filter((s) => s.status === 'completed'));
+
+      const now = new Date();
+      setCalendar(calendarData.filter((c) => new Date(c.start_time) >= now));
+      setPastEvents(calendarData.filter((c) => new Date(c.start_time) < now));
     } catch (error) {
       console.error('Error fetching items:', error);
     } finally {
@@ -84,7 +97,7 @@ export default function PersonalItemsDashboard() {
       });
       setProcessedItems(result);
       setShowResults(true);
-      await fetchAllItems(); // Refresh all items
+      await fetchAllItems();
     } catch (error) {
       console.error('Error processing input:', error);
     } finally {
@@ -93,7 +106,6 @@ export default function PersonalItemsDashboard() {
   };
 
   const handleManualAdd = (): void => {
-    // Implementation for manual add would go here
     console.log('Manual add:', { mode, todoTitle, shoppingItem, eventTitle });
     resetQuickAddForm();
     fetchAllItems();
@@ -168,6 +180,40 @@ export default function PersonalItemsDashboard() {
   const activeShopping = shopping.filter((s) => s.status !== 'completed');
   const upcomingEvents = calendar.filter((c) => c.status !== 'completed');
 
+  // Filter items based on search
+  const filterItems = <
+    T extends {
+      id: number;
+      title?: string | null;
+      item?: string | null;
+      item_name?: string | null;
+      description?: string | null;
+      priority?: number | string | null;
+      due_date?: string | null;
+      start_time?: string | null;
+      location?: string | null;
+      category?: string | null;
+      estimated_price?: number | null;
+    },
+  >(
+    items: T[]
+  ): T[] => {
+    if (!searchTerm.trim()) return items;
+    const search = searchTerm.toLowerCase();
+    return items.filter((item) => {
+      const title = (item.title || item.item_name || '').toLowerCase();
+      const desc = (item.description || '').toLowerCase();
+      return title.includes(search) || desc.includes(search);
+    });
+  };
+
+  const displayTodos =
+    viewMode === 'active' ? filterItems(activeTodos) : filterItems(completedTodos);
+  const displayShopping =
+    viewMode === 'active' ? filterItems(activeShopping) : filterItems(purchasedShopping);
+  const displayCalendar =
+    viewMode === 'active' ? filterItems(upcomingEvents) : filterItems(pastEvents);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
       <div className="mx-auto max-w-6xl space-y-6">
@@ -199,6 +245,13 @@ export default function PersonalItemsDashboard() {
             >
               Settings
             </Link>
+            <button
+              onClick={() => setShowQuickAdd(true)}
+              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+            >
+              <Plus className="h-5 w-5" />
+              Quick Add
+            </button>
           </div>
         </div>
 
@@ -209,6 +262,9 @@ export default function PersonalItemsDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Active Todos</p>
                 <p className="mt-1 text-3xl font-bold text-gray-900">{activeTodos.length}</p>
+                {completedTodos.length > 0 && (
+                  <p className="mt-1 text-xs text-gray-500">{completedTodos.length} completed</p>
+                )}
               </div>
               <div className="rounded-full bg-blue-100 p-3">
                 <CheckSquare className="h-6 w-6 text-blue-600" />
@@ -221,6 +277,9 @@ export default function PersonalItemsDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Shopping Items</p>
                 <p className="mt-1 text-3xl font-bold text-gray-900">{activeShopping.length}</p>
+                {purchasedShopping.length > 0 && (
+                  <p className="mt-1 text-xs text-gray-500">{purchasedShopping.length} purchased</p>
+                )}
               </div>
               <div className="rounded-full bg-green-100 p-3">
                 <ShoppingCart className="h-6 w-6 text-green-600" />
@@ -233,6 +292,9 @@ export default function PersonalItemsDashboard() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Upcoming Events</p>
                 <p className="mt-1 text-3xl font-bold text-gray-900">{upcomingEvents.length}</p>
+                {pastEvents.length > 0 && (
+                  <p className="mt-1 text-xs text-gray-500">{pastEvents.length} past</p>
+                )}
               </div>
               <div className="rounded-full bg-orange-100 p-3">
                 <Calendar className="h-6 w-6 text-orange-600" />
@@ -243,40 +305,78 @@ export default function PersonalItemsDashboard() {
 
         {/* Tabs */}
         <div className="overflow-hidden rounded-2xl bg-white shadow-md">
-          <div className="flex border-b border-gray-200">
-            <button
-              onClick={() => setActiveTab('todos')}
-              className={`flex flex-1 items-center justify-center gap-2 px-6 py-4 font-semibold transition-colors ${
-                activeTab === 'todos'
-                  ? 'border-b-2 border-blue-500 bg-blue-50 text-blue-600'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <CheckSquare className="h-5 w-5" />
-              Todos
-            </button>
-            <button
-              onClick={() => setActiveTab('shopping')}
-              className={`flex flex-1 items-center justify-center gap-2 px-6 py-4 font-semibold transition-colors ${
-                activeTab === 'shopping'
-                  ? 'border-b-2 border-green-500 bg-green-50 text-green-600'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <ShoppingCart className="h-5 w-5" />
-              Shopping
-            </button>
-            <button
-              onClick={() => setActiveTab('calendar')}
-              className={`flex flex-1 items-center justify-center gap-2 px-6 py-4 font-semibold transition-colors ${
-                activeTab === 'calendar'
-                  ? 'border-b-2 border-orange-500 bg-orange-50 text-orange-600'
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
-            >
-              <Calendar className="h-5 w-5" />
-              Calendar
-            </button>
+          <div className="flex items-center justify-between border-b border-gray-200 p-4">
+            <div className="flex">
+              <button
+                onClick={() => setActiveTab('todos')}
+                className={`flex items-center gap-2 px-6 py-3 font-semibold transition-colors ${
+                  activeTab === 'todos'
+                    ? 'border-b-2 border-blue-500 text-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <CheckSquare className="h-5 w-5" />
+                Todos
+              </button>
+              <button
+                onClick={() => setActiveTab('shopping')}
+                className={`flex items-center gap-2 px-6 py-3 font-semibold transition-colors ${
+                  activeTab === 'shopping'
+                    ? 'border-b-2 border-green-500 text-green-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <ShoppingCart className="h-5 w-5" />
+                Shopping
+              </button>
+              <button
+                onClick={() => setActiveTab('calendar')}
+                className={`flex items-center gap-2 px-6 py-3 font-semibold transition-colors ${
+                  activeTab === 'calendar'
+                    ? 'border-b-2 border-orange-500 text-orange-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Calendar className="h-5 w-5" />
+                Calendar
+              </button>
+            </div>
+
+            {/* Search and View Toggle */}
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="rounded-lg border border-gray-200 bg-gray-50 py-2 pr-4 pl-9 text-sm focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-200 focus:outline-none"
+                />
+              </div>
+              <div className="flex rounded-lg border border-gray-200 bg-gray-50 p-1">
+                <button
+                  onClick={() => setViewMode('active')}
+                  className={`rounded-md px-3 py-1 text-xs font-medium transition ${
+                    viewMode === 'active'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Active
+                </button>
+                <button
+                  onClick={() => setViewMode('history')}
+                  className={`rounded-md px-3 py-1 text-xs font-medium transition ${
+                    viewMode === 'history'
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  History
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Content */}
@@ -290,27 +390,47 @@ export default function PersonalItemsDashboard() {
                 {/* Todos Tab */}
                 {activeTab === 'todos' && (
                   <div className="space-y-3">
-                    {activeTodos.length === 0 ? (
+                    {displayTodos.length === 0 ? (
                       <div className="py-12 text-center text-gray-500">
                         <CheckSquare className="mx-auto mb-3 h-12 w-12 text-gray-300" />
-                        <p className="font-medium">No active todos</p>
-                        <p className="mt-1 text-sm">Add your first task to get started!</p>
+                        <p className="font-medium">
+                          {viewMode === 'active' ? 'No active todos' : 'No completed todos'}
+                        </p>
+                        <p className="mt-1 text-sm">
+                          {viewMode === 'active'
+                            ? 'Add your first task to get started!'
+                            : 'Complete some todos to see them here!'}
+                        </p>
                       </div>
                     ) : (
-                      activeTodos.map((todo) => (
+                      displayTodos.map((todo) => (
                         <div
                           key={todo.id}
-                          className="group flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 transition hover:border-blue-300 hover:shadow-md"
+                          className={`group flex items-center justify-between rounded-xl border p-4 transition ${
+                            viewMode === 'history'
+                              ? 'border-gray-200 bg-gray-50 opacity-75'
+                              : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'
+                          }`}
                         >
                           <div className="flex flex-1 items-center gap-3">
-                            <button
-                              onClick={() => toggleTodoComplete(todo.id)}
-                              className="rounded-lg border-2 border-gray-300 p-1 transition hover:border-blue-500 hover:bg-blue-50"
-                            >
-                              <Check className="h-4 w-4 text-transparent group-hover:text-blue-500" />
-                            </button>
+                            {viewMode === 'active' ? (
+                              <button
+                                onClick={() => toggleTodoComplete(todo.id)}
+                                className="rounded-lg border-2 border-gray-300 p-1 transition hover:border-blue-500 hover:bg-blue-50"
+                              >
+                                <Check className="h-4 w-4 text-transparent group-hover:text-blue-500" />
+                              </button>
+                            ) : (
+                              <div className="rounded-lg border-2 border-green-500 bg-green-50 p-1">
+                                <Check className="h-4 w-4 text-green-600" />
+                              </div>
+                            )}
                             <div className="flex-1">
-                              <h4 className="font-medium text-gray-900">{todo.title}</h4>
+                              <h4
+                                className={`font-medium ${viewMode === 'history' ? 'text-gray-600 line-through' : 'text-gray-900'}`}
+                              >
+                                {todo.title}
+                              </h4>
                               {todo.description && (
                                 <p className="mt-1 text-sm text-gray-600">{todo.description}</p>
                               )}
@@ -328,20 +448,23 @@ export default function PersonalItemsDashboard() {
                                 </span>
                                 {todo.due_date && (
                                   <span className="text-xs text-gray-500">
-                                    Due: {new Date(todo.due_date).toLocaleDateString()}
+                                    {viewMode === 'history' ? 'Completed' : 'Due'}:{' '}
+                                    {new Date(todo.due_date).toLocaleDateString()}
                                   </span>
                                 )}
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-                            <button
-                              onClick={() => deleteTodo(todo.id)}
-                              className="rounded-lg p-2 text-red-500 transition hover:bg-red-50"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
+                          {viewMode === 'active' && (
+                            <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                              <button
+                                onClick={() => deleteTodo(todo.id)}
+                                className="rounded-lg p-2 text-red-500 transition hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ))
                     )}
@@ -351,27 +474,47 @@ export default function PersonalItemsDashboard() {
                 {/* Shopping Tab */}
                 {activeTab === 'shopping' && (
                   <div className="space-y-3">
-                    {activeShopping.length === 0 ? (
+                    {displayShopping.length === 0 ? (
                       <div className="py-12 text-center text-gray-500">
                         <ShoppingCart className="mx-auto mb-3 h-12 w-12 text-gray-300" />
-                        <p className="font-medium">No shopping items</p>
-                        <p className="mt-1 text-sm">Add items to your shopping list!</p>
+                        <p className="font-medium">
+                          {viewMode === 'active' ? 'No shopping items' : 'No purchased items'}
+                        </p>
+                        <p className="mt-1 text-sm">
+                          {viewMode === 'active'
+                            ? 'Add items to your shopping list!'
+                            : 'Purchase some items to see them here!'}
+                        </p>
                       </div>
                     ) : (
-                      activeShopping.map((item) => (
+                      displayShopping.map((item) => (
                         <div
                           key={item.id}
-                          className="group flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 transition hover:border-green-300 hover:shadow-md"
+                          className={`group flex items-center justify-between rounded-xl border p-4 transition ${
+                            viewMode === 'history'
+                              ? 'border-gray-200 bg-gray-50 opacity-75'
+                              : 'border-gray-200 bg-white hover:border-green-300 hover:shadow-md'
+                          }`}
                         >
                           <div className="flex flex-1 items-center gap-3">
-                            <button
-                              onClick={() => markShoppingPurchased(item.id)}
-                              className="rounded-lg border-2 border-gray-300 p-1 transition hover:border-green-500 hover:bg-green-50"
-                            >
-                              <Check className="h-4 w-4 text-transparent group-hover:text-green-500" />
-                            </button>
+                            {viewMode === 'active' ? (
+                              <button
+                                onClick={() => markShoppingPurchased(item.id)}
+                                className="rounded-lg border-2 border-gray-300 p-1 transition hover:border-green-500 hover:bg-green-50"
+                              >
+                                <Check className="h-4 w-4 text-transparent group-hover:text-green-500" />
+                              </button>
+                            ) : (
+                              <div className="rounded-lg border-2 border-green-500 bg-green-50 p-1">
+                                <Check className="h-4 w-4 text-green-600" />
+                              </div>
+                            )}
                             <div className="flex-1">
-                              <h4 className="font-medium text-gray-900">{item.item_name}</h4>
+                              <h4
+                                className={`font-medium ${viewMode === 'history' ? 'text-gray-600 line-through' : 'text-gray-900'}`}
+                              >
+                                {item.item_name}
+                              </h4>
                               <div className="mt-2 flex items-center gap-2">
                                 <span className="rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700">
                                   {item.category}
@@ -384,14 +527,16 @@ export default function PersonalItemsDashboard() {
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-                            <button
-                              onClick={() => deleteShopping(item.id)}
-                              className="rounded-lg p-2 text-red-500 transition hover:bg-red-50"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
+                          {viewMode === 'active' && (
+                            <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                              <button
+                                onClick={() => deleteShopping(item.id)}
+                                className="rounded-lg p-2 text-red-500 transition hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ))
                     )}
@@ -401,31 +546,57 @@ export default function PersonalItemsDashboard() {
                 {/* Calendar Tab */}
                 {activeTab === 'calendar' && (
                   <div className="space-y-3">
-                    {upcomingEvents.length === 0 ? (
+                    {displayCalendar.length === 0 ? (
                       <div className="py-12 text-center text-gray-500">
                         <Calendar className="mx-auto mb-3 h-12 w-12 text-gray-300" />
-                        <p className="font-medium">No upcoming events</p>
-                        <p className="mt-1 text-sm">Schedule your first event!</p>
+                        <p className="font-medium">
+                          {viewMode === 'active' ? 'No upcoming events' : 'No past events'}
+                        </p>
+                        <p className="mt-1 text-sm">
+                          {viewMode === 'active'
+                            ? 'Schedule your first event!'
+                            : 'Past events will appear here!'}
+                        </p>
                       </div>
                     ) : (
-                      upcomingEvents.map((event) => (
+                      displayCalendar.map((event) => (
                         <div
                           key={event.id}
-                          className="group flex items-center justify-between rounded-xl border border-gray-200 bg-white p-4 transition hover:border-orange-300 hover:shadow-md"
+                          className={`group flex items-center justify-between rounded-xl border p-4 transition ${
+                            viewMode === 'history'
+                              ? 'border-gray-200 bg-gray-50 opacity-75'
+                              : 'border-gray-200 bg-white hover:border-orange-300 hover:shadow-md'
+                          }`}
                         >
                           <div className="flex flex-1 items-center gap-3">
-                            <div className="rounded-lg bg-orange-100 p-3 text-center">
-                              <div className="text-xs font-semibold text-orange-600">
+                            <div
+                              className={`rounded-lg p-3 text-center ${
+                                viewMode === 'history' ? 'bg-gray-100' : 'bg-orange-100'
+                              }`}
+                            >
+                              <div
+                                className={`text-xs font-semibold ${
+                                  viewMode === 'history' ? 'text-gray-600' : 'text-orange-600'
+                                }`}
+                              >
                                 {new Date(event.start_time).toLocaleDateString('en-US', {
                                   month: 'short',
                                 })}
                               </div>
-                              <div className="text-lg font-bold text-orange-900">
+                              <div
+                                className={`text-lg font-bold ${
+                                  viewMode === 'history' ? 'text-gray-700' : 'text-orange-900'
+                                }`}
+                              >
                                 {new Date(event.start_time).getDate()}
                               </div>
                             </div>
                             <div className="flex-1">
-                              <h4 className="font-medium text-gray-900">{event.title}</h4>
+                              <h4
+                                className={`font-medium ${viewMode === 'history' ? 'text-gray-600' : 'text-gray-900'}`}
+                              >
+                                {event.title}
+                              </h4>
                               {event.location && (
                                 <p className="mt-1 text-sm text-gray-600">📍 {event.location}</p>
                               )}
@@ -434,14 +605,16 @@ export default function PersonalItemsDashboard() {
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-                            <button
-                              onClick={() => deleteCalendar(event.id)}
-                              className="rounded-lg p-2 text-red-500 transition hover:bg-red-50"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
+                          {viewMode === 'active' && (
+                            <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                              <button
+                                onClick={() => deleteCalendar(event.id)}
+                                className="rounded-lg p-2 text-red-500 transition hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ))
                     )}
@@ -457,7 +630,6 @@ export default function PersonalItemsDashboard() {
       {showQuickAdd && (
         <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4">
           <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
-            {/* Header */}
             <div className="flex items-center justify-between border-b border-gray-100 p-4">
               <h3 className="text-lg font-semibold text-gray-900">Quick Add</h3>
               <button
@@ -468,7 +640,6 @@ export default function PersonalItemsDashboard() {
               </button>
             </div>
 
-            {/* Mode Selection */}
             {!mode && !showResults && (
               <div className="space-y-3 p-4">
                 <p className="mb-4 text-sm text-gray-600">What would you like to add?</p>
@@ -514,7 +685,6 @@ export default function PersonalItemsDashboard() {
               </div>
             )}
 
-            {/* AI Mode */}
             {mode === 'ai' && !showResults && (
               <div className="space-y-4 p-4">
                 <button
@@ -556,7 +726,6 @@ export default function PersonalItemsDashboard() {
               </div>
             )}
 
-            {/* Manual Todo Mode */}
             {mode === 'todo' && (
               <div className="space-y-4 p-4">
                 <button
@@ -600,7 +769,6 @@ export default function PersonalItemsDashboard() {
               </div>
             )}
 
-            {/* Manual Shopping Mode */}
             {mode === 'shopping' && (
               <div className="space-y-4 p-4">
                 <button
@@ -645,7 +813,6 @@ export default function PersonalItemsDashboard() {
               </div>
             )}
 
-            {/* Manual Calendar Mode */}
             {mode === 'calendar' && (
               <div className="space-y-4 p-4">
                 <button
@@ -699,7 +866,6 @@ export default function PersonalItemsDashboard() {
               </div>
             )}
 
-            {/* Results Display */}
             {showResults && processedItems && (
               <div className="max-h-96 space-y-4 overflow-y-auto p-4">
                 <div className="flex items-center justify-between">
@@ -773,7 +939,6 @@ export default function PersonalItemsDashboard() {
           </div>
         </div>
       )}
-      <QuickAddWidget />
     </div>
   );
 }
